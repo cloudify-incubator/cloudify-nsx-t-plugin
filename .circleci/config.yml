@@ -13,6 +13,7 @@ executors:
   py36:
     docker:
       - image: circleci/python:3.6
+    working_directory: ~/cloudify-nsx-t-plugin
 
 commands:
   run_unittest:
