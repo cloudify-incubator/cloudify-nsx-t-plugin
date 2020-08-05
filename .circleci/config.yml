@@ -16,23 +16,37 @@ executors:
     working_directory: ~/cloudify-nsx-t-plugin
 
 commands:
+  run_flake8:
+    steps:
+      - run: pip install --user flake8
+      - run: python -m flake8
+
   run_unittest:
     steps:
-      - checkout
       - run:
-          name: install tox
-          command: pip install --user tox
-      - run:
-          name: Run Flake8
-          command: /home/circleci/.local/bin/tox -e flake8
-      - run:
-         name: Run nosetest
-         command: /home/circleci/.local/bin/tox -e nosetests
+         name: Create virtualenv venv
+         command: virtualenv ~/venv
+      - run: |
+            ~/venv/bin/pip install -Ur test-requirements.txt
+            ~/venv/bin/pip install libs/*.whl
+
+      - run: |
+          ~/venv/bin/nosetests \
+           --nocapture \
+           --cover-html \
+           --with-coverage \
+           --cov-report term-missing \
+           --cover-package=nsx_t_plugin nsx_t_plugin/tests \
+           --cover-package=nsx_t_sdk nsx_t_sdk/tests \
+           --with-xunit --xunit-file=nosetests.xml
+
 
 jobs:
   unittests:
     executor: py36
     steps:
+      - checkout
+      - run_flake8
       - run_unittest
 
 workflows:
