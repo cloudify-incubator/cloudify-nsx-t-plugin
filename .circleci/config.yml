@@ -28,7 +28,7 @@ commands:
          command: virtualenv ~/venv
       - run: |
             ~/venv/bin/pip install -Ur test-requirements.txt
-            ~/venv/bin/pip install libs/*.whl
+            ~/venv/bin/pip install -Ur dev-requirements.txt
 
       - run: |
           ~/venv/bin/nosetests \

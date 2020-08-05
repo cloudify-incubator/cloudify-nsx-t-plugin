@@ -1,0 +1,6 @@
+libs/vapi_runtime-2.14.0-py2.py3-none-any.whl
+libs/vapi_common-2.14.0-py2.py3-none-any.whl
+libs/vapi_common_client-2.14.0-py2.py3-none-any.whl
+libs/nsx_python_sdk-3.0.0.0.0.15946039-py2.py3-none-any.whl
+libs/nsx_policy_python_sdk-3.0.0.0.0.15946039-py2.py3-none-any.whl
+libs/nsx_global_policy_python_sdk-3.0.0.0.0.15946039-py2.py3-none-any.whl
