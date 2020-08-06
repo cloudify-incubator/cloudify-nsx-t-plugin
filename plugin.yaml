@@ -19,3 +19,228 @@ plugins:
     source: https://github.com/Cloudify-PS/cloudify-nsx-t-plugin/archive/0.1.0.zip
     package_version: '0.1.0'
     executor: central_deployment_agent
+
+dsl_definitions:
+
+  client_config: &client_config
+    client_config:
+      type: cloudify.types.nsx-t.ClientConfig
+      description: Your NSX-T Client Configuration.
+      required: true
+
+  id: &data_type_id
+    id:
+      description: Resource id
+      type: string
+      required: false
+
+  display_name: &data_type_name
+    display_name:
+      description: >
+        Identifier to use when displaying entity in logs or GUI Defaults to ID if not set.
+      type: string
+      required: false
+      default: ''
+
+  description: &data_type_description
+    description:
+      description: Description of this resource
+      type: string
+      required: false
+
+  external_resource: &external_resource
+    use_external_resource:
+      description: Indicate whether the resource exists or if Cloudify should create the resource, true if you are bringing an existing resource, false if you want cloudify to create it.
+      type: boolean
+      default: false
+
+  create_if_missing: &create_if_missing
+    create_if_missing:
+      type: boolean
+      default: false
+      description: If use_external_resource is ``true`` and the resource is missing,create it instead of failing.
+
+data_types:
+  cloudify.types.nsx-t.ClientConfig:
+    properties:
+      host:
+        type: string
+        description: Your NSX-T Manager Host IP.
+        required: true
+      port:
+        type: string
+        description: Your NSX-T Manager Port that listen on.
+        required: true
+      username:
+        type: string
+        description: Your NSX-T Manager Username.
+        required: true
+      password:
+        type: string
+        description: Your NSX-T Manager Password.
+        required: true
+      auth_type:
+        type: string
+        description: >
+          Authentication Type
+          1. basic
+          2. session
+        default: basic
+        required: false
+      insecure:
+        type: string
+        description: If true, SSL validation is skipped.
+        required: false
+      cert:
+        type: string
+        description: Your cert file path.
+        required: false
+
+  cloudify.types.nsx-t.LogicalSwitch:
+    properties:
+      <<: *data_type_name
+      <<: *data_type_description
+      <<: *data_type_id
+      transport_zone_id:
+        type: string
+        required: true
+        description: >
+          Id of the TransportZone to which this LogicalSwitch is associated
+      admin_state:
+        type: string
+        required: true
+        description: >
+          Represents Desired state of the Logical Switch
+      global_vni:
+        type: integer
+        required: false
+        description: >
+          VNI allocated by the global manager
+          The VNI is used for intersite traffic and the global logical switch ID.
+          The global VNI pool is agnostic of the local VNI pool, and there is
+          no need to have an exclusive VNI range. For example, VNI x can be
+          the global VNI for logical switch B and the local VNI for logical switch A
+      hybrid:
+        type: boolean
+        required: false
+        default: false
+        description: >
+          Flag to identify a hybrid logical switch
+          If this flag is set to true, then all the logical switch ports attached to
+          this logical switch will behave in a hybrid fashion. The hybrid logical switch port
+          indicates to NSX that the VM intends to operate in underlay mode,
+          but retains the ability to forward egress traffic to the NSX overlay network.
+          This flag can be enabled only for the logical switches in the overlay type transport zone which has
+          host switch mode as STANDARD and also has either CrossCloud or CloudScope tag scopes.
+          Only the NSX public cloud gateway (PCG) uses this flag, other host agents like ESX, KVM and Edge
+          will ignore it. This property cannot be modified once the logical switch is created
+      ip_pool_id:
+        type: string
+        required: false
+        description: >
+          Allocation ip pool associated with the Logical switch
+          IP pool id that associated with a LogicalSwitch.
+      mac_pool_id:
+        type: string
+        required: false
+        description: >
+          Allocation mac pool associated with the Logical switch
+          Mac pool id that associated with a LogicalSwitch.
+      replication_mode:
+        type: string
+        required: false
+        description: >
+          Replication mode of the Logical Switch. Enum: MTEP, SOURCE
+      switch_type:
+        type: string
+        required: false
+        default: DEFAULT
+        description: >
+          Type of LogicalSwitch.
+          This field indicates purpose of a LogicalSwitch. It is set by manager internally
+          or user can provide this field. If not set, DEFAULT type is assigned.
+          NSX components can use this field to create LogicalSwitch that provides component
+          specific functionality.
+          DEFAULT type LogicalSwitches are created for basic L2 connectivity by API users.
+          SERVICE_PLANE type LogicalSwitches are system created service plane LogicalSwitches for
+          Service Insertion service. User can not create SERVICE_PLANE type of LogicalSwitch.
+          DHCP_RELAY type LogicalSwitches are created by external user like Policy with special
+          permissions or by system and will be treated as internal LogicalSwitches. Such
+          LogicalSwitch will not be exposed to vSphere user.
+          GLOBAL type LogicalSwitches are created to span multiple NSX domains to connect multiple
+          remote sites.
+          Enum: DEFAULT, SERVICE_PLANE, DHCP_RELAY, GLOBAL
+      uplink_teaming_policy_name:
+        type: string
+        required: false
+        description: >
+          he name of the switching uplink teaming policy for the logical switch
+          This name has to be one of the switching uplink teaming policy names
+          listed inside the logical switch's TransportZone. If this field is
+          not specified, the logical switch will not have a teaming policy
+          associated with it and the host switch's default teaming policy will be used.
+      vlan:
+        type: integer
+        required: false
+        description: >
+          VLAN Id of logical switch
+          This property is dedicated to VLAN based network, to set VLAN of logical
+          network. It is mutually exclusive with 'vlan_trunk_spec'.
+      vni:
+        type: integer
+        required: false
+        description: >
+          VNI for this LogicalSwitch.
+          Only for OVERLAY network. A VNI will be auto-allocated from the
+          default VNI pool if not given; otherwise the given VNI has to be
+          inside the default pool and not used by any other LogicalSwitch.
+      vlan_trunk_spec:
+        type: dict
+        required: false
+        description: >
+          VLAN trunk spec of logical switch
+          This property is used for VLAN trunk specification of logical switch.
+          It's mutually exclusive with 'vlan'. Also it could be set to do guest VLAN
+          tagging in overlay network. https://vdc-download.vmware.com/vmwb-repository/dcr-public/9e1c6bcc-85db-46b6-bc38-d6d2431e7c17/30af91b5-3a91-4d5d-8ed5-a7d806764a16/api_includes/types_VlanTrunkSpec.html
+      span:
+        type: list
+        required: false
+        description: >
+          Opaque identifiers meaningful to the API user. https://code.vmware.com/apis/976/nsx-t
+      tags:
+        type: list
+        required: false
+        description: >
+	      List of Local Manager IDs the logical switch extends
+          Each manager ID represents the NSX Local Manager the logical switch connects.
+          This will be populated by the manager. Array of string
+      address_bindings:
+        type: list
+        required: false
+        description: >
+            Address bindings for the Logical switch. Array of PacketAddressClassifier
+            https://vdc-download.vmware.com/vmwb-repository/dcr-public/9e1c6bcc-85db-46b6-bc38-d6d2431e7c17/30af91b5-3a91-4d5d-8ed5-a7d806764a16/api_includes/types_PacketAddressClassifier.html
+      extra_configs:
+        type: list
+        required: false
+        description: >
+          Extra configs on logical switch
+          This property could be used for vendor specific configuration in key value
+          string pairs, the setting in extra_configs will be automatically inheritted
+          by logical ports in the logical switch. Array of ExtraConfig https://vdc-download.vmware.com/vmwb-repository/dcr-public/9e1c6bcc-85db-46b6-bc38-d6d2431e7c17/30af91b5-3a91-4d5d-8ed5-a7d806764a16/api_includes/types_ExtraConfig.html
+
+node_types:
+  cloudify.nodes.nsx-t.LogicalSwitch:
+    derived_from: cloudify.nodes.Root
+    properties:
+      <<: *client_config
+      resource_config:
+        type: cloudify.types.nsx-t.LogicalSwitch
+        required: true
+        description: A dictionary in order to create logical switch resource
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: nsx-t.nsx_t_plugin.logical_switch.create
+        delete:
+          implementation: nsx-t.nsx_t_plugin.logical_switch.delete
