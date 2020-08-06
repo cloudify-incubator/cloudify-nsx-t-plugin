@@ -241,6 +241,6 @@ node_types:
     interfaces:
       cloudify.interfaces.lifecycle:
         create:
-          implementation: nsx-t.nsx_t_plugin.logical_switch.create
+          implementation: nsx-t.nsx_t_plugin.logical_switch.logical_switch.create
         delete:
-          implementation: nsx-t.nsx_t_plugin.logical_switch.delete
+          implementation: nsx-t.nsx_t_plugin.logical_switch.logical_switch.delete
