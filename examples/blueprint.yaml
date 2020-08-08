@@ -3,3 +3,40 @@ tosca_definitions_version: cloudify_dsl_1_3
 imports:
   - http://www.getcloudify.org/spec/cloudify/5.1.0.dev1/types.yaml
   - plugin:cloudify-nsx-t-plugin
+
+
+inputs:
+
+  host:
+    type: string
+    default: 127.0.0.1
+
+  port:
+    type: string
+    default: 443
+
+  username:
+    type: string
+    default: 'nsx-t'
+
+  password:
+    type: string
+    default: 'nsx-t-password'
+
+
+dsl_definitions:
+
+  client_config: &client_config
+    host: { get_input: host }
+    port: { get_input: port }
+    username: { get_input: username }
+    password: { get_input: password }
+
+node_templates:
+  logical_switch:
+    type: cloudify.nodes.nsx-t.LogicalSwitch
+    properties:
+      client_config: *client_config
+      resource_config:
+        transport_zone_id: test-id
+        admin_state: test-state

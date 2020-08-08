@@ -210,10 +210,6 @@ data_types:
       tags:
         type: list
         required: false
-        description: >
-	      List of Local Manager IDs the logical switch extends
-          Each manager ID represents the NSX Local Manager the logical switch connects.
-          This will be populated by the manager. Array of string
       address_bindings:
         type: list
         required: false

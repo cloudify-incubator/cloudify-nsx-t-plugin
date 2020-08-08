@@ -28,5 +28,11 @@ setup(
     description='A Cloudify plugin for NSX-T',
     install_requires=[
         'cloudify-common>=4.5',
+        'vapi-common==2.14.0',
+        'vapi-common-client==2.14.0',
+        'vapi-runtime==2.14.0',
+        'nsx-global-policy-python-sdk==3.0.0.0.0.15946039',
+        'nsx-policy-python-sdk==3.0.0.0.0.15946039',
+        'nsx-python-sdk==3.0.0.0.0.15946039'
     ]
 )
