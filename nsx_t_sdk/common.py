@@ -41,7 +41,7 @@ class NSXTResource(object):
     is_policy_client = False
 
     resource_type = None
-    service_type = None
+    service_name = None
 
     allow_create = True
     allow_delete = True
@@ -141,7 +141,7 @@ class NSXTResource(object):
         kwargs = kwargs or {}
         self.logger.debug('HTTP Request Args: {0}'.format(args))
         self.logger.debug('HTTP Request Kwargs: {0}'.format(kwargs))
-        service_client = getattr(self._api_client, self.service_type)
+        service_client = getattr(self._api_client, self.service_name)
         service_action = getattr(service_client, action)
         try:
             if args and kwargs:
