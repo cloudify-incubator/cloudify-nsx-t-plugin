@@ -24,5 +24,5 @@ class LogicalSwitch(NSXTResource):
 
 class Segment(NSXTResource):
     client_type = 'nsx_infra'
-    resource_type = 'LogicalSwitch'
-    service_name = 'LogicalSwitches'
+    resource_type = 'Segment'
+    service_name = 'Segments'
