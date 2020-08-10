@@ -13,16 +13,22 @@
 #    * See the License for the specific language governing permissions and
 #    * limitations under the License.
 
-from nsx_t_sdk.common import NSXTResource
+from cloudify import ctx
+
+from nsx_t_plugin.decorators import with_nsx_t_client
+from nsx_t_sdk.resources import Segment
 
 
-class LogicalSwitch(NSXTResource):
-    client_type = 'nsx'
-    resource_type = 'LogicalSwitch'
-    service_name = 'LogicalSwitches'
+@with_nsx_t_client(Segment)
+def create(nsx_t_resource):
+    resource = nsx_t_resource.create()
+    # Set the "id" as a runtime property for the created server
+    ctx.instance.runtime_properties['id'] = resource.id
+
+    # Update the resource_id with the new "id" returned from API
+    nsx_t_resource.resource_id = resource.id
 
 
-class Segment(NSXTResource):
-    client_type = 'nsx_infra'
-    resource_type = 'LogicalSwitch'
-    service_name = 'LogicalSwitches'
+@with_nsx_t_client(Segment)
+def delete(nsx_t_resource):
+    nsx_t_resource.delete()

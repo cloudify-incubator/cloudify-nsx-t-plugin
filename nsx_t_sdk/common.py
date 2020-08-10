@@ -23,6 +23,7 @@ from vmware.vapi.bindings.error import VapiError
 
 from com.vmware import nsx_policy_client
 from com.vmware import nsx_client
+from com.vmware.nsx_policy import infra_client
 
 from nsx_t_sdk import exceptions
 from nsx_t_sdk._compat import text_type
@@ -38,7 +39,7 @@ ACTION_LIST = 'list'
 
 
 class NSXTResource(object):
-    is_policy_client = False
+    client_type = False
 
     resource_type = None
     service_name = None
@@ -57,6 +58,18 @@ class NSXTResource(object):
         if self.resource_config.get('id'):
             self.resource_id = self.resource_config['id']
         self._api_client = self._prepare_nsx_t_client()
+
+    @staticmethod
+    def _get_nsx_client_map():
+        return {
+            'nsx': nsx_client,
+            'nsx_policy': nsx_policy_client,
+            'nsx_infra': infra_client
+        }
+
+    def _get_stub_factory_for_nsx_client(self, stub_config):
+        client = self._get_nsx_client_map()[self.client_type]
+        return client.StubFactory(stub_config)
 
     @property
     def username(self):
@@ -129,11 +142,7 @@ class NSXTResource(object):
                     self.password
                 )
             connector.set_security_context(security_context)
-        if self.is_policy_client:
-            stub_factory = nsx_policy_client.StubFactory(stub_config)
-        else:
-            stub_factory = nsx_client.StubFactory(stub_config)
-
+        stub_factory = self._get_stub_factory_for_nsx_client(stub_config)
         return ApiClient(stub_factory)
 
     def _invoke(self, action, args=None, kwargs=None):

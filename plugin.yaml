@@ -95,7 +95,6 @@ data_types:
         type: string
         description: Your cert file path.
         required: false
-
   cloudify.types.nsx-t.LogicalSwitch:
     properties:
       <<: *data_type_name
@@ -225,6 +224,264 @@ data_types:
           string pairs, the setting in extra_configs will be automatically inheritted
           by logical ports in the logical switch. Array of ExtraConfig https://vdc-download.vmware.com/vmwb-repository/dcr-public/9e1c6bcc-85db-46b6-bc38-d6d2431e7c17/30af91b5-3a91-4d5d-8ed5-a7d806764a16/api_includes/types_ExtraConfig.html
 
+  cloudify.types.nsx-t.SegmentDhcpConfig:
+    properties:
+      dns_servers:
+        type: list
+        required: false
+        default: []
+        description: >
+          IP address of DNS servers for subnet. DNS server IP address must
+          belong to the same address family as segment gateway_address
+          property.
+      lease_time:
+        type: integer
+        required: false
+        description: >
+          DHCP lease time for subnet
+          DHCP lease time in seconds. When specified, this property overwrites
+          lease time configured DHCP server config.
+      server_address:
+        type: list
+        required: false
+        description: >
+          IP address of the DHCP server in CIDR format.
+          The server_address is mandatory in case this segment has provided a
+          dhcp_config_path and it represents a DHCP server config.
+          If this SegmentDhcpConfig is a SegmentDhcpV4Config, the address must
+          be an IPv4 address. If this is a SegmentDhcpV6Config, the address must
+          be an IPv6 address.
+          This address must not overlap the ip-ranges of the subnet, or the
+          gateway address of the subnet, or the DHCP static-binding addresses
+          of this segment.
+      options:
+        type: dict
+        required: false
+        default: {}
+        description: >
+          DHCP options.
+
+
+  cloudify.types.nsx-t.SegmentDhcpV4Config:
+    derived_from: cloudify.types.nsx-t.SegmentDhcpConfig
+    properties:
+      resource_type:
+        type: string
+        required: false
+        default: SegmentDhcpV4Config
+  cloudify.types.nsx-t.SegmentDhcpV6Config:
+    derived_from: cloudify.types.nsx-t.SegmentDhcpConfig
+    properties:
+      resource_type:
+        type: string
+        required: false
+        default: SegmentDhcpV6Config
+  cloudify.types.nsx-t.SegmentSubnet:
+    properties:
+      dhcp_v4_config:
+        type: cloudify.types.nsx-t.SegmentDhcpV4Config
+        required: false
+        default: {}
+        description: >
+          Additional DHCP configuration for current subnet.
+      dhcp_v6_config:
+        type: cloudify.types.nsx-t.SegmentDhcpV6Config
+        required: false
+        default: {}
+        description: >
+          Additional DHCP configuration for current subnet.
+      dhcp_ranges:
+        type: list
+        required: false
+        default: []
+        description: >
+          DHCP address ranges are used for dynamic IP allocation.
+          Supports address range and CIDR formats. First valid
+          host address from the first value is assigned to DHCP server
+          IP address. Existing values cannot be deleted or modified,
+          but additional DHCP ranges can be added.
+      gateway_address:
+        type: string
+        required: false
+        description: >
+          Gateway IP address in CIDR format for both IPv4 and IPv6.
+
+
+  cloudify.types.nsx-t.Segment:
+    properties:
+      <<: *data_type_name
+      <<: *data_type_description
+      <<: *data_type_id
+      admin_state:
+        type: string
+        required: false
+        default: UP
+        description: >
+          Policy path to the transport zone
+          supported:
+          - UP
+          - DOWN
+      replication_mode:
+        type: string
+        required: false
+        default: MTEP
+        description: >
+          Replication mode of the Segment
+          If this field is not set for overlay segment, then the default of MTEP
+          will be used
+          The allowed valued are
+          - MTEP
+          - SOURCE
+      transport_zone_path:
+        type: string
+        required: false
+        default: UP
+        description: >
+          Policy path to the transport zone
+          Policy path to the transport zone. Supported for VLAN backed segments
+          as well as Overlay Segments. This field is required for VLAN backed
+          Segments. Auto assigned if only one transport zone exists in the
+          enforcement point. Default transport zone is auto assigned for
+          overlay segments if none specified.
+      connectivity_path:
+        type: string
+        required: false
+        description: >
+          Policy path to the connecting Tier-0 or Tier-1. Valid only for
+          segments created under Infra.
+      dhcp_config_path:
+        type: string
+        required: false
+        description: >
+          Policy path to DHCP server or relay configuration to use for all
+          IPv4 & IPv6 subnets configured on this segment
+      l2_extension:
+        type: dict
+        required: false
+        description: >
+          Configuration for extending Segment through L2 VPN
+      domain_name:
+        type: string
+        required: false
+        description: >
+           DNS domain name
+      extra_configs:
+        type: list
+        required: false
+        description: >
+          Extra configs on Segment
+          This property could be used for vendor specific configuration in key value
+          string pairs, the setting in extra_configs will be automatically inheritted
+          by segment ports in the Segment.
+          https://vdc-download.vmware.com/vmwb-repository/dcr-public/9e1c6bcc-85db-46b6-bc38-d6d2431e7c17/30af91b5-3a91-4d5d-8ed5-a7d806764a16/api_includes/types_SegmentExtraConfig.html
+      metadata_proxy_paths:
+        type: list
+        required: false
+        description: >
+          Metadata Proxy Configuration Paths
+          Policy path to metadata proxy configuration.
+          Multiple distinct MD proxies can be configured.
+      mac_pool_id:
+        type: string
+        required: false
+        description: >
+          Allocation mac pool associated with the Segment
+          Mac pool id that associated with a Segment
+      overlay_id:
+        type: integer
+        required: false
+        description: >
+            Overlay connectivity ID for this Segment
+            Used for overlay connectivity of segments. The overlay_id
+            should be allocated from the pool as definied by enforcement-point.
+            If not provided, it is auto-allocated from the default pool on the
+            enforcement-point.
+      subnet:
+        type: cloudify.types.nsx-t.SegmentSubnet
+        required: false
+        default: {}
+      tags:
+        type: list
+        required: false
+        description: >
+          Opaque identifiers meaningful to the API user by having pairs of
+          scope and tag to associate with this policy
+          - scope: scop1
+            tag: tag1
+          - scope: sope2
+            tag: tag2
+          - scope: scop3
+            tag: tag3
+
+      address_bindings:
+        type: list
+        required: false
+        description: >
+          Address bindings for the Logical switch. Array of PacketAddressClassifier
+          https://vdc-download.vmware.com/vmwb-repository/dcr-public/9e1c6bcc-85db-46b6-bc38-d6d2431e7c17/30af91b5-3a91-4d5d-8ed5-a7d806764a16/api_includes/types_PacketAddressClassifier.html
+          Example
+          - ip_address: 10.0.0.6
+            mac_address:  a4:5e:60:e5:29:65
+            vlan_id: 22
+          - ip_address: 10.0.0.6
+            mac_address: b3:2b:41:d5:18:74
+            vlan_id: 23
+
+      bridge_profiles:
+        type: list
+        required: false
+        description: >
+          Bridge Profile Configuration
+          Multiple distinct L2 bridge profiles can be configured.
+          Example
+          - bridge_profile_path: /profile/bridge
+            uplink_teaming_policy_name: policy1
+            vlan_ids:
+             - 22
+             - 25
+             - 29
+            vlan_transport_zone_path: /vlan/transport/zone
+      children:
+        type: list
+        required: false
+        description: >
+          subtree for this type within policy tree containing nested elements.
+          https://vdc-download.vmware.com/vmwb-repository/dcr-public/9e1c6bcc-85db-46b6-bc38-d6d2431e7c17/30af91b5-3a91-4d5d-8ed5-a7d806764a16/api_includes/method_PatchInfraSegment.html
+      advanced_config:
+        type: dict
+        required: false
+        default: {}
+        description: >
+          Advanced configuration for Segment.
+          the advanced config contains the following configuration
+          address_pool_paths:
+             - /path/address/pool1
+             - /path/address/pool2
+          connectivity: ON
+          hybrid: false
+          local_egress: false
+          local_egress_routing_policies:
+             - nexthop_address: 10.0.0.8
+               prefix_list_paths:
+                - /path/prefix1
+                - /path/prefix2
+            - nexthop_address: 10.0.0.12
+              prefix_list_paths:
+               - /path/prefix3
+               - /path/prefix4
+          multicast: false
+          uplink_teaming_policy_name: policy-name
+
+      vlan_ids:
+        type: list
+        required: false
+        description: >
+          VLAN ids for VLAN backed Segment. Can be a VLAN id or a range of VLAN ids specified with '-' in between.
+          - 33
+          - 44
+          - 50-200
+
+
 node_types:
   cloudify.nodes.nsx-t.LogicalSwitch:
     derived_from: cloudify.nodes.Root
@@ -240,3 +497,18 @@ node_types:
           implementation: nsx-t.nsx_t_plugin.logical_switch.logical_switch.create
         delete:
           implementation: nsx-t.nsx_t_plugin.logical_switch.logical_switch.delete
+
+  cloudify.nodes.nsx-t.Segment:
+    derived_from: cloudify.nodes.Root
+    properties:
+      <<: *client_config
+      resource_config:
+        type: cloudify.types.nsx-t.Segment
+        required: true
+        description: A dictionary in order to create segment resource
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: nsx-t.nsx_t_plugin.segment.segment.create
+        delete:
+          implementation: nsx-t.nsx_t_plugin.segment.segment.delete
