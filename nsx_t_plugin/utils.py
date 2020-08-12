@@ -99,3 +99,14 @@ def populate_nsx_t_instance_from_ctx(class_decl, _ctx, kwargs):
                           logger=_ctx.logger)
 
     return resource
+
+
+def delete_runtime_properties_from_instance(_ctx):
+    """
+    Delete all runtime properties from node instance after finishing delete
+    operation task
+    :param _ctx: Cloudify node instance which is could be an instance of
+    RelationshipSubjectContext or CloudifyContext
+    """
+    for key in list(_ctx.instance.runtime_properties.keys()):
+        del _ctx.instance.runtime_properties[key]

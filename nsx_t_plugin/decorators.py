@@ -20,7 +20,13 @@ from cloudify.utils import exception_to_error_cause
 from cloudify import ctx as CloudifyContext
 
 from nsx_t_sdk.exceptions import NSXTSDKException
-from nsx_t_plugin.utils import get_ctx_object, populate_nsx_t_instance_from_ctx
+from nsx_t_plugin.utils import (
+    get_ctx_object,
+    populate_nsx_t_instance_from_ctx,
+    delete_runtime_properties_from_instance
+)
+
+DELETE_OPERATION = 'cloudify.interfaces.lifecycle.delete'
 
 
 def with_nsx_t_client(class_decl):
@@ -36,12 +42,15 @@ def with_nsx_t_client(class_decl):
                 kwargs
             )
             try:
-                return func(**kwargs)
+                func(**kwargs)
             except NSXTSDKException as error:
                 _, _, tb = sys.exc_info()
                 raise NonRecoverableError(
                     'Failure while trying to run operation:'
                     '{0}: {1}'.format(operation_name, error),
                     causes=[exception_to_error_cause(error, tb)])
+            else:
+                if operation_name == DELETE_OPERATION:
+                    delete_runtime_properties_from_instance(_ctx)
         return wrapper
     return _decorator
