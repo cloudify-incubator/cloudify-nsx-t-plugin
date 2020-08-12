@@ -22,9 +22,6 @@ from nsx_t_sdk.resources import LogicalSwitch
 @with_nsx_t_client(LogicalSwitch)
 def create(nsx_t_resource):
     resource = nsx_t_resource.create()
-    # Set the "id" as a runtime property for the created server
-    ctx.instance.runtime_properties['id'] = resource.id
-
     # Update the resource_id with the new "id" returned from API
     nsx_t_resource.resource_id = resource.id
 

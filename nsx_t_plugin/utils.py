@@ -16,6 +16,16 @@
 from cloudify.exceptions import NonRecoverableError
 from cloudify.constants import NODE_INSTANCE, RELATIONSHIP_INSTANCE
 
+DELETE_OPERATION = 'cloudify.interfaces.lifecycle.delete'
+CREATE_OPERATION = 'cloudify.interfaces.lifecycle.create'
+
+BASIC_RUNTIME_PROPERTIES = (
+    'id',
+    'resource_type'
+)
+NSXT_ID_PROPERTY = 'id'
+NSXT_TYPE_PROPERTY = 'type'
+
 
 def get_relationship_subject_context(_ctx):
     """
@@ -108,5 +118,34 @@ def delete_runtime_properties_from_instance(_ctx):
     :param _ctx: Cloudify node instance which is could be an instance of
     RelationshipSubjectContext or CloudifyContext
     """
-    for key in list(_ctx.instance.runtime_properties.keys()):
+    for key in _ctx.instance.runtime_properties.keys():
         del _ctx.instance.runtime_properties[key]
+
+
+def set_basic_runtime_properties_for_instance(nsx_t_resource, _ctx):
+    """
+    Set NSXT "id" & "type" as runtime properties for node instance
+    :param nsx_t_resource: NSXT resource instance
+    :param _ctx: Cloudify node instance which is could be an instance of
+    RelationshipSubjectContext or CloudifyContext
+    """
+    if _ctx and nsx_t_resource:
+        _ctx.instance.runtime_properties[
+            NSXT_TYPE_PROPERTY] = nsx_t_resource.resource_type
+        _ctx.instance.runtime_properties[
+            NSXT_ID_PROPERTY] = nsx_t_resource.resource_id
+
+
+def update_runtime_properties_for_instance(nsx_t_resource, _ctx, operation):
+    """
+    This method will update runtime properties for node instance based on
+    the operation task being running
+    :param nsx_t_resource: NSXT resource instance
+    :param _ctx: Cloudify node instance which is could be an instance of
+    RelationshipSubjectContext or CloudifyContext
+    :param str operation:
+    """
+    if operation == CREATE_OPERATION:
+        set_basic_runtime_properties_for_instance(nsx_t_resource, _ctx)
+    elif operation == DELETE_OPERATION:
+        delete_runtime_properties_from_instance(_ctx)
