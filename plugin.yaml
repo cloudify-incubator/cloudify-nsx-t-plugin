@@ -28,12 +28,6 @@ dsl_definitions:
       description: Your NSX-T Client Configuration.
       required: true
 
-  id: &data_type_id
-    id:
-      description: Resource id
-      type: string
-      required: false
-
   display_name: &data_type_name
     display_name:
       description: >
@@ -47,18 +41,6 @@ dsl_definitions:
       description: Description of this resource
       type: string
       required: false
-
-  external_resource: &external_resource
-    use_external_resource:
-      description: Indicate whether the resource exists or if Cloudify should create the resource, true if you are bringing an existing resource, false if you want cloudify to create it.
-      type: boolean
-      default: false
-
-  create_if_missing: &create_if_missing
-    create_if_missing:
-      type: boolean
-      default: false
-      description: If use_external_resource is ``true`` and the resource is missing,create it instead of failing.
 
 data_types:
   cloudify.types.nsx-t.ClientConfig:
@@ -99,7 +81,6 @@ data_types:
     properties:
       <<: *data_type_name
       <<: *data_type_description
-      <<: *data_type_id
       transport_zone_id:
         type: string
         required: true
@@ -311,7 +292,6 @@ data_types:
     properties:
       <<: *data_type_name
       <<: *data_type_description
-      <<: *data_type_id
       admin_state:
         type: string
         required: false
