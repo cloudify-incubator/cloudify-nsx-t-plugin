@@ -297,8 +297,7 @@ data_types:
         required: false
         default: UP
         description: >
-          Policy path to the transport zone
-          supported:
+          Represents Desired state of the Segment
           - UP
           - DOWN
       replication_mode:
@@ -315,14 +314,12 @@ data_types:
       transport_zone_path:
         type: string
         required: false
-        default: UP
         description: >
-          Policy path to the transport zone
           Policy path to the transport zone. Supported for VLAN backed segments
           as well as Overlay Segments. This field is required for VLAN backed
           Segments. Auto assigned if only one transport zone exists in the
           enforcement point. Default transport zone is auto assigned for
-          overlay segments if none specified.
+          overlay segments if none specified
       connectivity_path:
         type: string
         required: false
