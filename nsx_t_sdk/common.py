@@ -54,9 +54,7 @@ class NSXTResource(object):
         self.client_config = client_config
         self.logger = logger
         self.resource_config = resource_config or {}
-        self.resource_id = None
-        if self.resource_config.get('id'):
-            self.resource_id = self.resource_config['id']
+        self.resource_id = self.resource_config['id']
         self._api_client = self._prepare_nsx_t_client()
 
     @staticmethod
@@ -179,8 +177,7 @@ class NSXTResource(object):
             )
 
     def create(self):
-        self._validate_allowed_method(self.allow_create, ACTION_CREATE)
-        return self._invoke(ACTION_CREATE, self.resource_config)
+        return self.update(self.resource_config)
 
     def update(self, new_config=None):
         self._validate_allowed_method(self.allow_update, ACTION_UPDATE)
