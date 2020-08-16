@@ -443,5 +443,5 @@ node_types:
           implementation: nsx-t.nsx_t_plugin.dhcp_server.dhcp_server_config.delete
 
 relationships:
-  cloudify.relationships.nsx-t.logical_dhcp_server_connected_to_dhcp_profile:
+  cloudify.relationships.nsx-t.segment_connected_to_dhcp_server_config:
     derived_from: cloudify.relationships.connected_to

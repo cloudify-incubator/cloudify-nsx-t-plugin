@@ -1,0 +1,35 @@
+# Client Config
+host: -YOUR_HOST-
+port: -YOUR_PORT-
+username: -YOUR_USERNAME-
+password: -YOUR_PASSWORD-
+
+dhcp_server_config:
+  id: test_dhcp_server
+  display_name: Test DHCP Server
+  description: Test DHCP Server Config
+  edge_cluster_path: /infra/sites/default/enforcement-points/default/edge-clusters/b004f47e-f18d-42b3-a226-ed33e534ebe0
+  tags:
+    - scope: Name
+      tag: Test DHCP
+
+segment_config:
+  id: test_segment
+  display_name: Test Segment
+  description: Test Segment Config
+  transport_zone_path: /infra/sites/default/enforcement-points/default/transport-zones/1b3a2f36-bfd1-443e-a0f6-4de01abc963e
+  connectivity_path: /infra/tier-1s/test-tier1
+  dhcp_config_path: /infra/dhcp-server-configs/test_dhcp_server
+  subnet:
+    ip_v4_config:
+      dhcp_config:
+        server_address: 192.168.11.11/24
+        lease_time: 86400
+        resource_type: SegmentDhcpV4Config
+      gateway_address: 192.168.11.12/24
+    ip_v6_config:
+      dhcp_config:
+        server_address: fc7e:f206:db42::6/48
+        lease_time: 86400
+        resource_type: SegmentDhcpV6Config
+      gateway_address: fc7e:f206:db42::2/48

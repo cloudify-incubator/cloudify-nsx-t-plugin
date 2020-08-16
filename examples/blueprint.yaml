@@ -9,20 +9,21 @@ inputs:
 
   host:
     type: string
-    default: 127.0.0.1
 
   port:
     type: string
-    default: 443
 
   username:
     type: string
-    default: 'nsx-t'
 
   password:
     type: string
-    default: 'nsx-t-password'
 
+  dhcp_server_config:
+    type: dict
+
+  segment_config:
+    type: dict
 
 dsl_definitions:
 
@@ -33,10 +34,17 @@ dsl_definitions:
     password: { get_input: password }
 
 node_templates:
-  logical_switch:
-    type: cloudify.nodes.nsx-t.LogicalSwitch
+  dhcb_server_config:
+    type: cloudify.nodes.nsx-t.DhcpServerConfig
     properties:
       client_config: *client_config
-      resource_config:
-        transport_zone_id: test-id
-        admin_state: test-state
+      resource_config: { get_input: dhcp_server_config }
+
+  segment:
+    type: cloudify.nodes.nsx-t.Segment
+    properties:
+      client_config: *client_config
+      resource_config: { get_input: segment_config }
+    relationships:
+      - type: cloudify.relationships.nsx-t.segment_connected_to_dhcp_server_config
+        target: dhcb_server_config
