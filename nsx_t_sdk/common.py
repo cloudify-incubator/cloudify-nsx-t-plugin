@@ -183,17 +183,17 @@ class NSXTResource(object):
         self._validate_allowed_method(self.allow_update, ACTION_UPDATE)
         return self._invoke(
             ACTION_UPDATE,
-            self.resource_id,
+            (self.resource_id,),
             new_config
         )
 
     def delete(self):
         self._validate_allowed_method(self.allow_delete, ACTION_DELETE)
-        return self._invoke(ACTION_DELETE, self.resource_id)
+        return self._invoke(ACTION_DELETE, (self.resource_id,))
 
     def get(self):
         self._validate_allowed_method(self.allow_get, ACTION_GET)
-        return self._invoke(ACTION_GET, self.resource_id)
+        return self._invoke(ACTION_GET, (self.resource_id,))
 
     def list(self,
              cursor=None,
@@ -212,4 +212,4 @@ class NSXTResource(object):
         }
         if filters:
             params.update(filters)
-        return self._invoke(ACTION_LIST, **params)
+        return self._invoke(ACTION_LIST, kwargs=params)
