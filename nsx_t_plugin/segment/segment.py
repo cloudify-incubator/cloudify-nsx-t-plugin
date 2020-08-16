@@ -20,18 +20,13 @@ from nsx_t_sdk.resources import Segment
 
 
 def _update_subnet_configuration(resource_config):
-    subnet = resource_config.get('subnet')
+    subnet = resource_config.pop('subnet', {})
     if subnet:
-        dhcp_options_config = ['dhcp_v4_config', 'dhcp_v6_config']
-        if all([item in subnet for item in dhcp_options_config]):
-            raise NonRecoverableError(
-                'Both {0} are provided, only one of '
-                'them is allowed'.format(','.join(dhcp_options_config)))
-        dhcp_config = \
-            subnet.get('dhcp_v4_config') or subnet.get('dhcp_v6_config')
-        resource_config['subnet']['dhcp_config'] = dhcp_config
-        resource_config['subnets'] = []
-        resource_config['subnets'][0] = resource_config.pop('subnet')
+        resource_config['subnet'] = []
+        for ip_option in ['ip_v4_config', 'ip_v6_config']:
+            ip_option_config = subnet.get(ip_option)
+            if ip_option_config:
+                resource_config['subnets'].append(ip_option_config)
 
 
 @with_nsx_t_client(Segment)

@@ -205,6 +205,7 @@ data_types:
           string pairs, the setting in extra_configs will be automatically inheritted
           by logical ports in the logical switch. Array of ExtraConfig https://vdc-download.vmware.com/vmwb-repository/dcr-public/9e1c6bcc-85db-46b6-bc38-d6d2431e7c17/30af91b5-3a91-4d5d-8ed5-a7d806764a16/api_includes/types_ExtraConfig.html
 
+
   cloudify.types.nsx-t.SegmentDhcpConfig:
     properties:
       dns_servers:
@@ -241,8 +242,6 @@ data_types:
         default: {}
         description: >
           DHCP options.
-
-
   cloudify.types.nsx-t.SegmentDhcpV4Config:
     derived_from: cloudify.types.nsx-t.SegmentDhcpConfig
     properties:
@@ -257,20 +256,8 @@ data_types:
         type: string
         required: false
         default: SegmentDhcpV6Config
-  cloudify.types.nsx-t.SegmentSubnet:
+  cloudify.types.nsx-t.SegmentIPConfig:
     properties:
-      dhcp_v4_config:
-        type: cloudify.types.nsx-t.SegmentDhcpV4Config
-        required: false
-        default: {}
-        description: >
-          Additional DHCP configuration for current subnet.
-      dhcp_v6_config:
-        type: cloudify.types.nsx-t.SegmentDhcpV6Config
-        required: false
-        default: {}
-        description: >
-          Additional DHCP configuration for current subnet.
       dhcp_ranges:
         type: list
         required: false
@@ -286,6 +273,35 @@ data_types:
         required: false
         description: >
           Gateway IP address in CIDR format for both IPv4 and IPv6.
+
+  cloudify.types.nsx-t.SegmentIPV4Config:
+    derived_from: cloudify.types.nsx-t.SegmentIPConfig
+    properties:
+      dhcp_config:
+        type: cloudify.types.nsx-t.SegmentDhcpV4Config
+        required: false
+        default: {}
+  cloudify.types.nsx-t.SegmentIPV6Config:
+    derived_from: cloudify.types.nsx-t.SegmentIPConfig
+    properties:
+      dhcp_config:
+        type: cloudify.types.nsx-t.SegmentDhcpV6Config
+        required: false
+        default: {}
+  cloudify.types.nsx-t.SegmentSubnet:
+    properties:
+      ip_v4_config:
+        type: cloudify.types.nsx-t.SegmentIPV4Config
+        required: false
+        default: {}
+        description: >
+          IP V4 Configuration.
+      ip_v6_config:
+        type: cloudify.types.nsx-t.SegmentIPV6Config
+        required: false
+        default: {}
+        description: >
+          IP V6 Configuration.
 
 
   cloudify.types.nsx-t.Segment:
