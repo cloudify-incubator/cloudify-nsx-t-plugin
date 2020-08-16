@@ -118,7 +118,7 @@ def delete_runtime_properties_from_instance(_ctx):
     :param _ctx: Cloudify node instance which is could be an instance of
     RelationshipSubjectContext or CloudifyContext
     """
-    for key in _ctx.instance.runtime_properties.keys():
+    for key in list(_ctx.instance.runtime_properties.keys()):
         del _ctx.instance.runtime_properties[key]
 
 
