@@ -12,9 +12,6 @@
 #    * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #    * See the License for the specific language governing permissions and
 #    * limitations under the License.
-
-from cloudify.exceptions import NonRecoverableError
-
 from nsx_t_plugin.decorators import with_nsx_t_client
 from nsx_t_sdk.resources import Segment
 
