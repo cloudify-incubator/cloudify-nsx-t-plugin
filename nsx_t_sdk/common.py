@@ -54,7 +54,7 @@ class NSXTResource(object):
         self.client_config = client_config
         self.logger = logger
         self.resource_config = resource_config or {}
-        self.resource_id = self.resource_config['id']
+        self.resource_id = self.resource_config.pop('id')
         self._api_client = self._prepare_nsx_t_client()
 
     @staticmethod
