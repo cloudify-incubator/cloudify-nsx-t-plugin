@@ -183,8 +183,7 @@ class NSXTResource(object):
         self._validate_allowed_method(self.allow_update, ACTION_UPDATE)
         return self._invoke(
             ACTION_UPDATE,
-            (self.resource_id,),
-            new_config
+            (self.resource_id, new_config,),
         )
 
     def delete(self):
