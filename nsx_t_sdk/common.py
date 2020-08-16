@@ -24,6 +24,7 @@ from vmware.vapi.bindings.error import VapiError
 from com.vmware import nsx_policy_client
 from com.vmware import nsx_client
 from com.vmware.nsx_policy import infra_client
+from com.vmware.nsx_policy.infra import segments_client
 
 from nsx_t_sdk import exceptions
 from nsx_t_sdk._compat import text_type
@@ -63,7 +64,8 @@ class NSXTResource(object):
         return {
             'nsx': nsx_client,
             'nsx_policy': nsx_policy_client,
-            'nsx_infra': infra_client
+            'nsx_infra': infra_client,
+            'segment': segments_client
         }
 
     def _get_stub_factory_for_nsx_client(self, stub_config):

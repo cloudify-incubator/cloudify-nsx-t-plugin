@@ -26,3 +26,15 @@ class Segment(NSXTResource):
     client_type = 'nsx_infra'
     resource_type = 'Segment'
     service_name = 'Segments'
+
+
+class SegmentState(NSXTResource):
+    client_type = 'segment'
+    resource_type = 'State'
+    service_name = 'State'
+
+    allow_create = False
+    allow_delete = False
+    allow_get = True
+    allow_list = False
+    allow_update = False

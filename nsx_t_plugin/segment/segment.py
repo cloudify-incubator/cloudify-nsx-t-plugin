@@ -12,8 +12,15 @@
 #    * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #    * See the License for the specific language governing permissions and
 #    * limitations under the License.
+
+from cloudify import ctx
+from cloudify.exceptions import OperationRetry, NonRecoverableError
+
 from nsx_t_plugin.decorators import with_nsx_t_client
-from nsx_t_sdk.resources import Segment
+from nsx_t_sdk.resources import Segment, SegmentState
+from com.vmware.vapi.std.errors_client import NotFound
+
+SEGMENT_TASK_DELETE = 'segment_delete_task'
 
 
 def _update_subnet_configuration(resource_config):
@@ -37,5 +44,54 @@ def create(nsx_t_resource):
 
 
 @with_nsx_t_client(Segment)
+def start(nsx_t_resource):
+    segment_state = SegmentState(
+      client_config=nsx_t_resource.client_config,
+      resource_config=nsx_t_resource.resource_config,
+      logger=ctx.logger
+    )
+    state = segment_state.state
+    if state in ['pending', 'in_progress']:
+        raise OperationRetry(
+            'Segment state '
+            'is still in {0} state'.format(segment_state.state)
+        )
+    elif state == 'success':
+        ctx.logger.info('Segment started successfully')
+    else:
+        raise NonRecoverableError(
+            'Segment failed to started {0}'.format(state)
+        )
+
+
+@with_nsx_t_client(Segment)
 def delete(nsx_t_resource):
-    nsx_t_resource.delete()
+    try:
+        segment = nsx_t_resource.get()
+    except NotFound:
+        ctx.logger.info('Segment {0} is deleted successfully'
+                        .format(segment.resource_id))
+        return
+    else:
+        segment_state = SegmentState(
+            client_config=nsx_t_resource.client_config,
+            resource_config=nsx_t_resource.resource_config,
+            logger=ctx.logger
+        )
+
+    if SEGMENT_TASK_DELETE not in ctx.instance.runtime_properties:
+        nsx_t_resource.delete()
+        ctx.instance.runtime_properties[SEGMENT_TASK_DELETE] = True
+
+    ctx.logger.info(
+        'Waiting for segment "{0}" to be deleted. '
+        'current status: {1}'.format(
+            segment.resource_id,
+            segment_state.state
+        )
+    )
+
+    raise OperationRetry(
+        message='Segment has {0} state.'
+                ''.format(segment_state.state)
+    )
