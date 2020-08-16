@@ -136,7 +136,7 @@ def set_basic_runtime_properties_for_instance(nsx_t_resource, _ctx):
         _ctx.instance.runtime_properties[
             NSXT_ID_PROPERTY] = nsx_t_resource.resource_id
         _ctx.instance.runtime_properties[
-            NSXT_RESOURCE_CONFIG_PROPERTY] = nsx_t_resource.get()
+            NSXT_RESOURCE_CONFIG_PROPERTY] = nsx_t_resource.get().to_dict()
 
 
 def update_runtime_properties_for_instance(nsx_t_resource, _ctx, operation):
