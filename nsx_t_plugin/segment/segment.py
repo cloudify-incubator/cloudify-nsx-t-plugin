@@ -19,7 +19,7 @@ from nsx_t_sdk.resources import Segment
 def _update_subnet_configuration(resource_config):
     subnet = resource_config.pop('subnet', {})
     if subnet:
-        resource_config['subnet'] = []
+        resource_config['subnets'] = []
         for ip_option in ['ip_v4_config', 'ip_v6_config']:
             ip_option_config = subnet.get(ip_option)
             if ip_option_config:
