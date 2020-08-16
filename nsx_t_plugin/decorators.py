@@ -50,7 +50,8 @@ def with_nsx_t_client(class_decl):
             else:
                 update_runtime_properties_for_instance(
                     kwargs['nsx_t_resource'],
-                    _ctx
+                    _ctx,
+                    operation_name
                 )
         return wrapper
     return _decorator
