@@ -102,6 +102,7 @@ class NSXTResource(object):
         return 'https://{0}:{1}'.format(self.host, self.port)
 
     def _prepare_session_auth(self, session):
+        self.logger.debug('Prepare session authentication....')
         resp = session.post(
             '{0}/{1}'.format(self.url, 'api/session/create'),
             data={
@@ -114,6 +115,7 @@ class NSXTResource(object):
 
         session.headers['Cookie'] = resp.headers.get('Set-Cookie')
         session.headers['X-XSRF-TOKEN'] = resp.headers.get('X-XSRF-TOKEN')
+        self.logger.debug('Session Cookie & X-XSRF-TOKEN are set successfully')
 
     def _prepare_nsx_t_client(self):
         session = requests.session()
@@ -121,6 +123,7 @@ class NSXTResource(object):
         session.cert = self.cert
         # Only Relevant for auth session
         if self.auth_type == AUTH_SESSION:
+            self.logger.debug('API calls is using session authentication')
             self._prepare_session_auth(session)
 
         connector = connect.get_requests_connector(
@@ -134,6 +137,7 @@ class NSXTResource(object):
         )
         # Only relevant for basic auth
         if self.auth_type == AUTH_BASIC:
+            self.logger.debug('API calls is using basic authentication')
             security_context = \
                 user_password.create_user_password_security_context(
                     self.username,
