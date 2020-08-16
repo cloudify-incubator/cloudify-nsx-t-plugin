@@ -25,6 +25,7 @@ BASIC_RUNTIME_PROPERTIES = (
 )
 NSXT_ID_PROPERTY = 'id'
 NSXT_TYPE_PROPERTY = 'type'
+NSXT_RESOURCE_CONFIG_PROPERTY = 'resource_config'
 
 
 def get_relationship_subject_context(_ctx):
@@ -134,6 +135,8 @@ def set_basic_runtime_properties_for_instance(nsx_t_resource, _ctx):
             NSXT_TYPE_PROPERTY] = nsx_t_resource.resource_type
         _ctx.instance.runtime_properties[
             NSXT_ID_PROPERTY] = nsx_t_resource.resource_id
+        _ctx.instance.runtime_properties[
+            NSXT_RESOURCE_CONFIG_PROPERTY] = nsx_t_resource.get()
 
 
 def update_runtime_properties_for_instance(nsx_t_resource, _ctx, operation):
