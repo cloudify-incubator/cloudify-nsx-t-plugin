@@ -16,16 +16,16 @@
 from nsx_t_sdk.common import NSXTResource
 
 
-class LogicalSwitch(NSXTResource):
-    client_type = 'nsx'
-    resource_type = 'LogicalSwitch'
-    service_name = 'LogicalSwitches'
-
-
 class Segment(NSXTResource):
     client_type = 'nsx_infra'
     resource_type = 'Segment'
     service_name = 'Segments'
+
+
+class DhcpServerConfig(NSXTResource):
+    client_type = 'nsx_infra'
+    resource_type = 'DhcpServerConfig'
+    service_name = 'DhcpServerConfigs'
 
 
 class SegmentState(NSXTResource):
