@@ -28,10 +28,18 @@ dsl_definitions:
       description: Your NSX-T Client Configuration.
       required: true
 
+  id: &data_type_id
+    display_name:
+      description: >
+        ID for nsxt resource.
+      type: string
+      required: false
+      default: ''
+
   display_name: &data_type_name
     display_name:
       description: >
-        Identifier to use when displaying entity in logs or GUI Defaults to ID if not set.
+        Display name of this resource
       type: string
       required: false
       default: ''
@@ -79,6 +87,7 @@ data_types:
         required: false
   cloudify.types.nsx-t.LogicalSwitch:
     properties:
+      <<: *data_type_id
       <<: *data_type_name
       <<: *data_type_description
       transport_zone_id:
@@ -306,6 +315,7 @@ data_types:
 
   cloudify.types.nsx-t.Segment:
     properties:
+      <<: *data_type_id
       <<: *data_type_name
       <<: *data_type_description
       admin_state:
