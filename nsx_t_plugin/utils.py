@@ -138,7 +138,7 @@ def set_basic_runtime_properties_for_instance(nsx_t_resource, _ctx):
         _ctx.instance.runtime_properties[
             NSXT_ID_PROPERTY] = nsx_t_resource.resource_id
         _ctx.instance.runtime_properties[
-            NSXT_NAME_PROPERTY] = resource_config.display_name
+            NSXT_NAME_PROPERTY] = resource_config['display_name']
         _ctx.instance.runtime_properties[
             NSXT_RESOURCE_CONFIG_PROPERTY] = resource_config
 
