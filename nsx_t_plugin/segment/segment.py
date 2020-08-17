@@ -50,7 +50,7 @@ def start(nsx_t_resource):
     if state in ['pending', 'in_progress']:
         raise OperationRetry(
             'Segment state '
-            'is still in {0} state'.format(nsx_t_resource.state)
+            'is still in {0} state'.format(state)
         )
     elif state == 'success':
         ctx.logger.info('Segment started successfully')
