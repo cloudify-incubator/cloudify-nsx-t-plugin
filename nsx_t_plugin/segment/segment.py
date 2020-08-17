@@ -45,7 +45,8 @@ def create(nsx_t_resource):
 
 @with_nsx_t_client(SegmentState)
 def start(nsx_t_resource):
-    state = nsx_t_resource.state
+    segment_state = nsx_t_resource.get()
+    state = segment_state.state
     if state in ['pending', 'in_progress']:
         raise OperationRetry(
             'Segment state '
@@ -62,17 +63,17 @@ def start(nsx_t_resource):
 @with_nsx_t_client(Segment)
 def delete(nsx_t_resource):
     try:
-        segment = nsx_t_resource.get()
+        nsx_t_resource.get()
     except NotFound:
         ctx.logger.info('Segment {0} is deleted successfully'
-                        .format(segment.resource_id))
+                        .format(nsx_t_resource.resource_id))
         return
     else:
         segment_state = SegmentState(
             client_config=nsx_t_resource.client_config,
             resource_config=nsx_t_resource.resource_config,
             logger=ctx.logger
-        )
+        ).get()
 
     if SEGMENT_TASK_DELETE not in ctx.instance.runtime_properties:
         nsx_t_resource.delete()
@@ -81,7 +82,7 @@ def delete(nsx_t_resource):
     ctx.logger.info(
         'Waiting for segment "{0}" to be deleted. '
         'current status: {1}'.format(
-            segment.resource_id,
+            nsx_t_resource.resource_id,
             segment_state.state
         )
     )
