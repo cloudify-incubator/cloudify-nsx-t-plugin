@@ -23,7 +23,6 @@ from cloudify.utils import exception_to_error_cause
 from cloudify.decorators import operation
 from cloudify import ctx as CloudifyContext
 
-from nsx_t_sdk.exceptions import NSXTSDKException
 from nsx_t_plugin.utils import (
     get_ctx_object,
     populate_nsx_t_instance_from_ctx,
