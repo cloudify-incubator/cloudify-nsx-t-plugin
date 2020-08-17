@@ -18,9 +18,12 @@ from cloudify.exceptions import OperationRetry, NonRecoverableError
 
 from nsx_t_plugin.decorators import with_nsx_t_client
 from nsx_t_sdk.resources import Segment, SegmentState
-from com.vmware.vapi.std.errors_client import NotFound
+from nsx_t_sdk.exceptions import NSXTSDKException
 
 SEGMENT_TASK_DELETE = 'segment_delete_task'
+SEGMENT_STATE_PENDING = 'pending'
+SEGMENT_STATE_IN_PROGRESS = 'in_progress'
+SEGMENT_STATE_SUCCESS = 'success'
 
 
 def _update_subnet_configuration(resource_config):
@@ -47,12 +50,12 @@ def create(nsx_t_resource):
 def start(nsx_t_resource):
     segment_state = nsx_t_resource.get()
     state = segment_state.state
-    if state in ['pending', 'in_progress']:
+    if state in [SEGMENT_STATE_PENDING, SEGMENT_STATE_IN_PROGRESS]:
         raise OperationRetry(
             'Segment state '
             'is still in {0} state'.format(state)
         )
-    elif state == 'success':
+    elif state == SEGMENT_STATE_SUCCESS:
         ctx.logger.info('Segment started successfully')
     else:
         raise NonRecoverableError(
@@ -64,30 +67,21 @@ def start(nsx_t_resource):
 def delete(nsx_t_resource):
     try:
         nsx_t_resource.get()
-    except NotFound:
+    except NSXTSDKException:
         ctx.logger.info('Segment {0} is deleted successfully'
                         .format(nsx_t_resource.resource_id))
         return
-    else:
-        segment_state = SegmentState(
-            client_config=nsx_t_resource.client_config,
-            resource_config=nsx_t_resource.resource_config,
-            logger=ctx.logger
-        ).get()
 
     if SEGMENT_TASK_DELETE not in ctx.instance.runtime_properties:
         nsx_t_resource.delete()
         ctx.instance.runtime_properties[SEGMENT_TASK_DELETE] = True
 
     ctx.logger.info(
-        'Waiting for segment "{0}" to be deleted. '
-        'current status: {1}'.format(
+        'Waiting for segment "{0}" to be deleted'.format(
             nsx_t_resource.resource_id,
-            segment_state.state
         )
     )
-
     raise OperationRetry(
-        message='Segment has {0} state.'
-                ''.format(segment_state.state)
+        message='Segment {0} not deleted yet.'
+                ''.format(nsx_t_resource.resource_id)
     )

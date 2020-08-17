@@ -15,10 +15,15 @@
 import sys
 from functools import wraps
 
-from cloudify.exceptions import NonRecoverableError
+from cloudify.exceptions import (
+    NonRecoverableError,
+    OperationRetry,
+)
 from cloudify.utils import exception_to_error_cause
+from cloudify.decorators import operation
 from cloudify import ctx as CloudifyContext
 
+from nsx_t_sdk.exceptions import NSXTSDKException
 from nsx_t_plugin.utils import (
     get_ctx_object,
     populate_nsx_t_instance_from_ctx,
@@ -40,6 +45,8 @@ def with_nsx_t_client(class_decl):
             )
             try:
                 func(**kwargs)
+            except OperationRetry:
+                raise
             except Exception as error:
                 _, _, tb = sys.exc_info()
                 raise NonRecoverableError(
@@ -53,4 +60,4 @@ def with_nsx_t_client(class_decl):
                     operation_name
                 )
         return wrapper
-    return _decorator
+    return operation(func=_decorator, resumable=True)
