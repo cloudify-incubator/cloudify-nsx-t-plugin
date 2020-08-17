@@ -24,6 +24,7 @@ BASIC_RUNTIME_PROPERTIES = (
     'resource_type'
 )
 NSXT_ID_PROPERTY = 'id'
+NSXT_NAME_PROPERTY = 'name'
 NSXT_TYPE_PROPERTY = 'type'
 NSXT_RESOURCE_CONFIG_PROPERTY = 'resource_config'
 
@@ -131,12 +132,15 @@ def set_basic_runtime_properties_for_instance(nsx_t_resource, _ctx):
     RelationshipSubjectContext or CloudifyContext
     """
     if _ctx and nsx_t_resource:
+        resource_config = nsx_t_resource.get().to_dict()
         _ctx.instance.runtime_properties[
             NSXT_TYPE_PROPERTY] = nsx_t_resource.resource_type
         _ctx.instance.runtime_properties[
             NSXT_ID_PROPERTY] = nsx_t_resource.resource_id
         _ctx.instance.runtime_properties[
-            NSXT_RESOURCE_CONFIG_PROPERTY] = nsx_t_resource.get().to_dict()
+            NSXT_NAME_PROPERTY] = resource_config['display_name']
+        _ctx.instance.runtime_properties[
+            NSXT_RESOURCE_CONFIG_PROPERTY] = resource_config
 
 
 def update_runtime_properties_for_instance(nsx_t_resource, _ctx, operation):
