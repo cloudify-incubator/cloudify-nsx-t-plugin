@@ -14,25 +14,9 @@
 #    * limitations under the License.
 
 
-from setuptools import setup
-from setuptools import find_packages
+class NSXTSDKException(Exception):
+    pass
 
 
-setup(
-    name='cloudify-nsx-t-plugin',
-    version='0.1.0',
-    author='Cloudify Platform Ltd.',
-    author_email='hello@cloudify.co',
-    license='LICENSE',
-    packages=find_packages(exclude=['tests*']),
-    description='A Cloudify plugin for NSX-T',
-    install_requires=[
-        'cloudify-common>=4.5',
-        'vapi-common==2.14.0',
-        'vapi-common-client==2.14.0',
-        'vapi-runtime==2.14.0',
-        'nsx-global-policy-python-sdk==3.0.0.0.0.15946039',
-        'nsx-policy-python-sdk==3.0.0.0.0.15946039',
-        'nsx-python-sdk==3.0.0.0.0.15946039'
-    ]
-)
+class MethodNotAllowed(NSXTSDKException):
+    pass

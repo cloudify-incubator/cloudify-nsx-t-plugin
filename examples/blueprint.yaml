@@ -3,3 +3,48 @@ tosca_definitions_version: cloudify_dsl_1_3
 imports:
   - http://www.getcloudify.org/spec/cloudify/5.1.0.dev1/types.yaml
   - plugin:cloudify-nsx-t-plugin
+
+
+inputs:
+
+  host:
+    type: string
+
+  port:
+    type: string
+
+  username:
+    type: string
+
+  password:
+    type: string
+
+  dhcp_server_config:
+    type: dict
+
+  segment_config:
+    type: dict
+
+dsl_definitions:
+
+  client_config: &client_config
+    host: { get_input: host }
+    port: { get_input: port }
+    username: { get_input: username }
+    password: { get_input: password }
+
+node_templates:
+  dhcb_server_config:
+    type: cloudify.nodes.nsx-t.DhcpServerConfig
+    properties:
+      client_config: *client_config
+      resource_config: { get_input: dhcp_server_config }
+
+  segment:
+    type: cloudify.nodes.nsx-t.Segment
+    properties:
+      client_config: *client_config
+      resource_config: { get_input: segment_config }
+    relationships:
+      - type: cloudify.relationships.nsx-t.segment_connected_to_dhcp_server_config
+        target: dhcb_server_config
