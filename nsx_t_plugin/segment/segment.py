@@ -43,18 +43,13 @@ def create(nsx_t_resource):
     nsx_t_resource.resource_id = resource.id
 
 
-@with_nsx_t_client(Segment)
+@with_nsx_t_client(SegmentState)
 def start(nsx_t_resource):
-    segment_state = SegmentState(
-      client_config=nsx_t_resource.client_config,
-      resource_config=nsx_t_resource.resource_config,
-      logger=ctx.logger
-    )
-    state = segment_state.state
+    state = nsx_t_resource.state
     if state in ['pending', 'in_progress']:
         raise OperationRetry(
             'Segment state '
-            'is still in {0} state'.format(segment_state.state)
+            'is still in {0} state'.format(nsx_t_resource.state)
         )
     elif state == 'success':
         ctx.logger.info('Segment started successfully')
