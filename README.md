@@ -16,10 +16,10 @@ The plugin provides the following features for interacting with NSX-T API:
 Each node template, has a `client_config` property which stores your account credentials.
 
 The `client_config` consists of the following:
-- `host`: Your NSX-T Manager Host IP.
-- `port`: Your NSX-T Manager Port that listen on.
-- `username`: Your NSX-T Manager Username.
-- `password`: Your NSX-T Manager Password.
+- `host`: _Required_.: Your NSX-T Manager Host IP.
+- `port`: _Required_.: Your NSX-T Manager Port that listen on.
+- `username`: _Required_.: Your NSX-T Manager Username.
+- `password`: _Required_.: Your NSX-T Manager Password.
 - `auth_type`: Authentication Type. It supports the following:
     - `basic`: Default value.
     - `session`  
