@@ -52,6 +52,7 @@ Node instances of any of the types defined in this plugin are set with the follo
 * `id`: The ID of the NSX-T resource
 * `name`: The name of the NSX-T resource
 * `type`: The type of the NSX-T resource
+* `resource_config`: The resource configuration returned from resource creation
 
  
 ## Node Types
