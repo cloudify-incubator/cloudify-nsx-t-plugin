@@ -38,7 +38,7 @@ inputs:
     type: string
     default: { get_secret: centos_template }
 
-  switch_distributed:
+  nsx_t_switch:
     type: boolean
     default: true
 
@@ -95,7 +95,7 @@ node_templates:
       networking:
         connect_networks:
           - name: { get_attribute: [ segment, name ] }
-            switch_distributed: { get_input: switch_distributed }
+            nsx_t_switch: { get_input: nsx_t_switch }
             use_dhcp: true
     relationships:
       - type: cloudify.relationships.depends_on
