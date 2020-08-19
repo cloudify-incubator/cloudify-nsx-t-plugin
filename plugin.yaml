@@ -16,8 +16,8 @@
 plugins:
   nsx-t:
     package_name: cloudify-nsx-t-plugin
-    source: https://github.com/Cloudify-PS/cloudify-nsx-t-plugin/archive/0.1.0.zip
-    package_version: '0.1.0'
+    source: https://github.com/Cloudify-PS/cloudify-nsx-t-plugin/archive/0.2.0.zip
+    package_version: '0.2.0'
     executor: central_deployment_agent
 
 dsl_definitions:
