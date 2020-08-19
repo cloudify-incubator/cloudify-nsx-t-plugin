@@ -13,7 +13,7 @@
 #    * See the License for the specific language governing permissions and
 #    * limitations under the License.
 
-from cloudify.context import ctx
+from cloudify import ctx
 
 from nsx_t_plugin.decorators import with_nsx_t_client
 from nsx_t_sdk.resources import DhcpServerConfig, Tier1
