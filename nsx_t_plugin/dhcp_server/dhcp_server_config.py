@@ -29,7 +29,7 @@ def _update_tier_1_gateway(client_config, tier1_gateway_id, dhcp_server_paths):
     )
     tier1_object = tier1.get()
     tier1_object.dhcp_config_paths = dhcp_server_paths
-    tier1.patch(tier1_object)
+    tier1.update(tier1_object)
 
 
 def _link_dhcp_server_to_tier_1(client_config, tier1_gateway_id):
