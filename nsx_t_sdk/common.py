@@ -34,6 +34,7 @@ AUTH_BASIC = 'basic'
 
 ACTION_CREATE = 'create'
 ACTION_UPDATE = 'update'
+ACTION_PATCH = 'patch'
 ACTION_DELETE = 'delete'
 ACTION_GET = 'get'
 ACTION_LIST = 'list'
@@ -50,6 +51,7 @@ class NSXTResource(object):
     allow_get = True
     allow_list = True
     allow_update = True
+    allow_patch = True
 
     def __init__(self, client_config, resource_config, logger):
         self.client_config = client_config
@@ -193,9 +195,21 @@ class NSXTResource(object):
             (self.resource_id, new_config,),
         )
 
-    def delete(self):
+    def patch(self, new_config=None):
+        self._validate_allowed_method(self.allow_patch, ACTION_PATCH)
+        return self._invoke(
+            ACTION_PATCH,
+            (self.resource_id, new_config,),
+        )
+
+    def delete(self, extra_params=None):
+        extra_params = extra_params or ()
         self._validate_allowed_method(self.allow_delete, ACTION_DELETE)
-        return self._invoke(ACTION_DELETE, (self.resource_id,))
+        params = (self.resource_id,)
+        if extra_params:
+            params += extra_params
+
+        return self._invoke(ACTION_DELETE, params)
 
     def get(self):
         self._validate_allowed_method(self.allow_get, ACTION_GET)
@@ -218,4 +232,5 @@ class NSXTResource(object):
         }
         if filters:
             params.update(filters)
-        return self._invoke(ACTION_LIST, kwargs=params)
+        results = self._invoke(ACTION_LIST, kwargs=params).to_dict()
+        return results['results'] if results.get('results') else []

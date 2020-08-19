@@ -16,8 +16,8 @@
 plugins:
   nsx-t:
     package_name: cloudify-nsx-t-plugin
-    source: https://github.com/Cloudify-PS/cloudify-nsx-t-plugin/archive/0.1.0.zip
-    package_version: '0.1.0'
+    source: https://github.com/Cloudify-PS/cloudify-nsx-t-plugin/archive/0.2.0.zip
+    package_version: '0.2.0'
     executor: central_deployment_agent
 
 dsl_definitions:
@@ -424,6 +424,8 @@ node_types:
           implementation: nsx-t.nsx_t_plugin.segment.segment.create
         start:
           implementation: nsx-t.nsx_t_plugin.segment.segment.start
+        stop:
+          implementation: nsx-t.nsx_t_plugin.segment.segment.stop
         delete:
           implementation: nsx-t.nsx_t_plugin.segment.segment.delete
 
@@ -431,6 +433,10 @@ node_types:
     derived_from: cloudify.nodes.Root
     properties:
       <<: *client_config
+      tier1_gateway_id:
+        type: string
+        required: false
+        description: The ID of the Tier 1 Gateway to connect DHCP to
       resource_config:
         type: cloudify.types.nsx-t.DhcpServerConfig
         required: true
@@ -439,6 +445,10 @@ node_types:
       cloudify.interfaces.lifecycle:
         create:
           implementation: nsx-t.nsx_t_plugin.dhcp_server.dhcp_server_config.create
+        configure:
+          implementation: nsx-t.nsx_t_plugin.dhcp_server.dhcp_server_config.configure
+        stop:
+          implementation: nsx-t.nsx_t_plugin.dhcp_server.dhcp_server_config.stop
         delete:
           implementation: nsx-t.nsx_t_plugin.dhcp_server.dhcp_server_config.delete
 

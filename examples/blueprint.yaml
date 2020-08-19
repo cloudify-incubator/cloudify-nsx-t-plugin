@@ -20,6 +20,9 @@ inputs:
   password:
     type: string
 
+  tier1_gateway_id:
+    type: string
+
   dhcp_server_config:
     type: dict
 
@@ -69,6 +72,7 @@ node_templates:
     type: cloudify.nodes.nsx-t.DhcpServerConfig
     properties:
       client_config: *client_config
+      tier1_gateway_id: { get_input: tier1_gateway_id }
       resource_config: { get_input: dhcp_server_config }
 
   segment:

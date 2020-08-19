@@ -17,7 +17,11 @@ from cloudify import ctx
 from cloudify.exceptions import OperationRetry, NonRecoverableError
 
 from nsx_t_plugin.decorators import with_nsx_t_client
-from nsx_t_sdk.resources import Segment, SegmentState
+from nsx_t_sdk.resources import (
+    Segment,
+    SegmentState,
+    SegmentPort
+)
 from nsx_t_sdk.exceptions import NSXTSDKException
 
 SEGMENT_TASK_DELETE = 'segment_delete_task'
@@ -64,6 +68,26 @@ def start(nsx_t_resource):
 
 
 @with_nsx_t_client(Segment)
+def stop(nsx_t_resource):
+    segment_port = SegmentPort(
+        client_config=nsx_t_resource.client_config,
+        logger=ctx.logger,
+        resource_config={}
+    )
+    for nsx_t_port in segment_port.list(
+            filters={
+                'segment_id': nsx_t_resource.resource_id
+            }
+    ):
+        port = SegmentPort(
+            client_config=nsx_t_resource.client_config,
+            logger=ctx.logger,
+            resource_config={'id': nsx_t_port['id']}
+        )
+        port.delete((nsx_t_resource.resource_id,))
+
+
+@with_nsx_t_client(Segment)
 def delete(nsx_t_resource):
     try:
         nsx_t_resource.get()
@@ -73,15 +97,26 @@ def delete(nsx_t_resource):
         return
 
     if SEGMENT_TASK_DELETE not in ctx.instance.runtime_properties:
-        nsx_t_resource.delete()
-        ctx.instance.runtime_properties[SEGMENT_TASK_DELETE] = True
-
-    ctx.logger.info(
-        'Waiting for segment "{0}" to be deleted'.format(
-            nsx_t_resource.resource_id,
-        )
-    )
-    raise OperationRetry(
-        message='Segment {0} not deleted yet.'
+        try:
+            nsx_t_resource.delete()
+        except NSXTSDKException:
+            ctx.logger.info(
+                'Segment {0} cannot be deleted now, try again'
                 ''.format(nsx_t_resource.resource_id)
-    )
+            )
+            raise OperationRetry(
+                message='Segment {0} deletion is in progress.'
+                        ''.format(nsx_t_resource.resource_id)
+            )
+        else:
+            ctx.instance.runtime_properties[SEGMENT_TASK_DELETE] = True
+    else:
+        ctx.logger.info(
+            'Waiting for segment "{0}" to be deleted'.format(
+                nsx_t_resource.resource_id,
+            )
+        )
+        raise OperationRetry(
+            message='Segment {0} deletion is in progress.'
+                    ''.format(nsx_t_resource.resource_id)
+        )

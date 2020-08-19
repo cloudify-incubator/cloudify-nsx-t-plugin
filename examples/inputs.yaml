@@ -4,6 +4,8 @@ port: -YOUR_PORT-
 username: -YOUR_USERNAME-
 password: -YOUR_PASSWORD-
 
+tier1_gateway_id: test-tier1
+
 dhcp_server_config:
   id: test_dhcp_server
   display_name: Test DHCP Server
