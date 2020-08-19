@@ -424,6 +424,8 @@ node_types:
           implementation: nsx-t.nsx_t_plugin.segment.segment.create
         start:
           implementation: nsx-t.nsx_t_plugin.segment.segment.start
+        stop:
+          implementation: nsx-t.nsx_t_plugin.segment.segment.stop
         delete:
           implementation: nsx-t.nsx_t_plugin.segment.segment.delete
 

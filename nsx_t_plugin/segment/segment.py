@@ -17,7 +17,11 @@ from cloudify import ctx
 from cloudify.exceptions import OperationRetry, NonRecoverableError
 
 from nsx_t_plugin.decorators import with_nsx_t_client
-from nsx_t_sdk.resources import Segment, SegmentState
+from nsx_t_sdk.resources import (
+    Segment,
+    SegmentState,
+    SegmentPort
+)
 from nsx_t_sdk.exceptions import NSXTSDKException
 
 SEGMENT_TASK_DELETE = 'segment_delete_task'
@@ -60,6 +64,29 @@ def start(nsx_t_resource):
     else:
         raise NonRecoverableError(
             'Segment failed to started {0}'.format(state)
+        )
+
+
+@with_nsx_t_client(Segment)
+def stop(nsx_t_resource):
+    port = SegmentPort(
+        client_config=nsx_t_resource.client_config,
+        logger=ctx.logger,
+        resource_config={}
+    )
+
+    try:
+        port.list(filters={'segment_id': nsx_t_resource.resource_id})
+    except NSXTSDKException:
+        ctx.logger.info(
+            'No more ports attached'
+            ' to segment: {0}'.format(nsx_t_resource.resource_id)
+        )
+        return
+    else:
+        raise OperationRetry(
+            message='Segment {0} still has port attached to it.'
+                    ''.format(nsx_t_resource.resource_id)
         )
 
 

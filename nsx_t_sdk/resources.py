@@ -22,10 +22,17 @@ class Segment(NSXTResource):
     service_name = 'Segments'
 
 
-class DhcpServerConfig(NSXTResource):
-    client_type = 'nsx_infra'
-    resource_type = 'DhcpServerConfig'
-    service_name = 'DhcpServerConfigs'
+class SegmentPort(NSXTResource):
+    client_type = 'segment'
+    resource_type = 'Port'
+    service_name = 'Ports'
+
+    allow_create = False
+    allow_delete = False
+    allow_get = True
+    allow_list = True
+    allow_update = False
+    allow_patch = False
 
 
 class SegmentState(NSXTResource):
@@ -39,6 +46,12 @@ class SegmentState(NSXTResource):
     allow_list = False
     allow_update = False
     allow_patch = False
+
+
+class DhcpServerConfig(NSXTResource):
+    client_type = 'nsx_infra'
+    resource_type = 'DhcpServerConfig'
+    service_name = 'DhcpServerConfigs'
 
 
 class Tier1(NSXTResource):
