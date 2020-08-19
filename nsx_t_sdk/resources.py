@@ -28,7 +28,7 @@ class SegmentPort(NSXTResource):
     service_name = 'Ports'
 
     allow_create = False
-    allow_delete = False
+    allow_delete = True
     allow_get = True
     allow_list = True
     allow_update = False
