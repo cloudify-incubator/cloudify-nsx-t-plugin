@@ -431,6 +431,10 @@ node_types:
     derived_from: cloudify.nodes.Root
     properties:
       <<: *client_config
+      tier1_gateway_id:
+        type: string
+        required: false
+        description: The ID of the Tier 1 Gateway to connect DHCP to
       resource_config:
         type: cloudify.types.nsx-t.DhcpServerConfig
         required: true
@@ -439,6 +443,8 @@ node_types:
       cloudify.interfaces.lifecycle:
         create:
           implementation: nsx-t.nsx_t_plugin.dhcp_server.dhcp_server_config.create
+        configure:
+          implementation: nsx-t.nsx_t_plugin.dhcp_server.dhcp_server_config.configure
         delete:
           implementation: nsx-t.nsx_t_plugin.dhcp_server.dhcp_server_config.delete
 

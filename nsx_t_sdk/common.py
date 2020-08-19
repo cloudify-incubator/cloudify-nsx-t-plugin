@@ -34,6 +34,7 @@ AUTH_BASIC = 'basic'
 
 ACTION_CREATE = 'create'
 ACTION_UPDATE = 'update'
+ACTION_PATCH = 'patch'
 ACTION_DELETE = 'delete'
 ACTION_GET = 'get'
 ACTION_LIST = 'list'
@@ -50,6 +51,7 @@ class NSXTResource(object):
     allow_get = True
     allow_list = True
     allow_update = True
+    allow_patch = True
 
     def __init__(self, client_config, resource_config, logger):
         self.client_config = client_config
@@ -190,6 +192,13 @@ class NSXTResource(object):
         self._validate_allowed_method(self.allow_update, ACTION_UPDATE)
         return self._invoke(
             ACTION_UPDATE,
+            (self.resource_id, new_config,),
+        )
+
+    def patch(self, new_config=None):
+        self._validate_allowed_method(self.allow_patch, ACTION_PATCH)
+        return self._invoke(
+            ACTION_PATCH,
             (self.resource_id, new_config,),
         )
 

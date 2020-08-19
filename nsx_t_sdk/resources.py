@@ -38,3 +38,10 @@ class SegmentState(NSXTResource):
     allow_get = True
     allow_list = False
     allow_update = False
+    allow_patch = False
+
+
+class Tier1(NSXTResource):
+    client_type = 'nsx_infra'
+    resource_type = 'Tier1'
+    service_name = 'Tier1s'
