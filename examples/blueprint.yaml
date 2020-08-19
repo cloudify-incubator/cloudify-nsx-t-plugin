@@ -20,6 +20,9 @@ inputs:
   password:
     type: string
 
+  tier1_gateway_id:
+    type: string
+
   dhcp_server_config:
     type: dict
 
@@ -81,23 +84,23 @@ node_templates:
       - type: cloudify.relationships.nsx-t.segment_connected_to_dhcp_server_config
         target: dhcb_server_config
 
-#  host:
-#    type: cloudify.vsphere.nodes.Server
-#    properties:
-#      connection_config: *connection_config
-#      agent_config:
-#        install_method: none
-#      allowed_clusters: { get_input: allowed_clusters }
-#      server:
-#        name: { get_input: server_name }
-#        template: { get_input: template }
-#        cpus: 1
-#        memory: 1024
-#      networking:
-#        connect_networks:
-#          - name: { get_attribute: [ segment, name ] }
-#            nsx_t_switch: { get_input: nsx_t_switch }
-#            use_dhcp: true
-#    relationships:
-#      - type: cloudify.relationships.depends_on
-#        target: segment
+  host:
+    type: cloudify.vsphere.nodes.Server
+    properties:
+      connection_config: *connection_config
+      agent_config:
+        install_method: none
+      allowed_clusters: { get_input: allowed_clusters }
+      server:
+        name: { get_input: server_name }
+        template: { get_input: template }
+        cpus: 1
+        memory: 1024
+      networking:
+        connect_networks:
+          - name: { get_attribute: [ segment, name ] }
+            nsx_t_switch: { get_input: nsx_t_switch }
+            use_dhcp: true
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: segment

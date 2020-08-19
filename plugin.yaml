@@ -445,6 +445,8 @@ node_types:
           implementation: nsx-t.nsx_t_plugin.dhcp_server.dhcp_server_config.create
         configure:
           implementation: nsx-t.nsx_t_plugin.dhcp_server.dhcp_server_config.configure
+        stop:
+          implementation: nsx-t.nsx_t_plugin.dhcp_server.dhcp_server_config.stop
         delete:
           implementation: nsx-t.nsx_t_plugin.dhcp_server.dhcp_server_config.delete
 
