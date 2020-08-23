@@ -12,6 +12,7 @@
 #    * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #    * See the License for the specific language governing permissions and
 #    * limitations under the License.
+from cloudify import ctx
 
 from nsx_t_plugin.decorators import with_nsx_t_client
 from nsx_t_plugin.utils import (
@@ -27,6 +28,8 @@ def create(nsx_t_resource):
     resource = nsx_t_resource.create()
     # Update the resource_id with the new "id" returned from API
     nsx_t_resource.resource_id = resource.id
+    # Save path as runtime property to use it later on
+    ctx.instance.runtime_properties['path'] = resource.path
 
 
 @with_nsx_t_client(Tier1state)

@@ -20,8 +20,8 @@ inputs:
   password:
     type: string
 
-  tier1_gateway_id:
-    type: string
+  tier1_config:
+    type: dict
 
   dhcp_server_config:
     type: dict
@@ -57,6 +57,12 @@ dsl_definitions:
     username: { get_input: username }
     password: { get_input: password }
 
+  tier_1_path: &tier_1_path:
+    connectivity_path: { get_attribute: [ tier1, path ] }
+
+  dhcp_config_path: &dhcp_config_path:
+    dhcp_config_path: { get_attribute: [ dhcb_server_config, path ] }
+
   connection_config: &connection_config
     username: { get_secret: vsphere_username }
     password: { get_secret: vsphere_password }
@@ -68,18 +74,28 @@ dsl_definitions:
     allow_insecure: true
 
 node_templates:
+  tier1:
+    type: cloudify.nodes.nsx-t.Tier1
+    client_config: *client_config
+    resource_config: { get_input: tier1_config }
+
   dhcb_server_config:
     type: cloudify.nodes.nsx-t.DhcpServerConfig
     properties:
       client_config: *client_config
-      tier1_gateway_id: { get_input: tier1_gateway_id }
+      tier1_gateway_id: { get_attribute: [ tier1, id ] }
       resource_config: { get_input: dhcp_server_config }
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: tier1
 
   segment:
     type: cloudify.nodes.nsx-t.Segment
     properties:
       client_config: *client_config
       resource_config: { get_input: segment_config }
+          <<: *tier_1_path
+          <<: *dhcp_config_path
     relationships:
       - type: cloudify.relationships.nsx-t.segment_connected_to_dhcp_server_config
         target: dhcb_server_config
