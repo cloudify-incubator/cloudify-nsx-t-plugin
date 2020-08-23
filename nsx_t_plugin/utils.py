@@ -26,11 +26,7 @@ from nsx_t_plugin.constants import (
     NSXT_ID_PROPERTY,
     NSXT_NAME_PROPERTY,
     NSXT_TYPE_PROPERTY,
-    NSXT_RESOURCE_CONFIG_PROPERTY,
-    STATE_IN_PROGRESS,
-    STATE_SUCCESS,
-    STATE_PENDING,
-    STATE_IN_SYNC
+    NSXT_RESOURCE_CONFIG_PROPERTY
 )
 
 
@@ -163,22 +159,29 @@ def update_runtime_properties_for_instance(nsx_t_resource, _ctx, operation):
         delete_runtime_properties_from_instance(_ctx)
 
 
-def validate_if_resource_started(resource_name, nsx_t_state):
+def validate_if_resource_started(
+        resource_name,
+        nsx_t_state,
+        pending_states,
+        ready_states
+):
     """
     This method will validate if the nsx_t_resource is ready to use and started
     :param resource_name: The name of the resource we need to get state for
     :param nsx_t_state: Instance derived from "NSXTResource" class
+    :param pending_states: List of pending state to wait for
+    :param ready_states: List of ready states to say that resource is ready
     """
     resource_state = nsx_t_state.get()
     state = getattr(resource_state, nsx_t_state.state_attr, 'state')
     if not isinstance(state, text_type):
         state = state.state
-    if state in [STATE_PENDING, STATE_IN_PROGRESS, STATE_IN_SYNC]:
+    if state in pending_states:
         raise OperationRetry(
             '{0} state '
             'is still in {1}'.format(resource_name, state)
         )
-    elif state == STATE_SUCCESS:
+    elif state in ready_states:
         ctx.logger.info('{0} started successfully'
                         ''.format(resource_name))
     else:

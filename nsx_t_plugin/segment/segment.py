@@ -16,6 +16,11 @@
 from cloudify import ctx
 
 from nsx_t_plugin.decorators import with_nsx_t_client
+from nsx_t_plugin.constants import (
+    STATE_IN_PROGRESS,
+    STATE_SUCCESS,
+    STATE_PENDING,
+)
 from nsx_t_plugin.utils import (
     validate_if_resource_started,
     validate_if_resource_deleted
@@ -49,7 +54,12 @@ def create(nsx_t_resource):
 
 @with_nsx_t_client(SegmentState)
 def start(nsx_t_resource):
-    validate_if_resource_started('Segment', nsx_t_resource)
+    validate_if_resource_started(
+        'Segment',
+        nsx_t_resource,
+        [STATE_PENDING, STATE_IN_PROGRESS],
+        [STATE_SUCCESS]
+    )
 
 
 @with_nsx_t_client(Segment)

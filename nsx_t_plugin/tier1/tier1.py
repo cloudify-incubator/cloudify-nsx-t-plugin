@@ -15,9 +15,15 @@
 from cloudify import ctx
 
 from nsx_t_plugin.decorators import with_nsx_t_client
+from nsx_t_plugin.constants import (
+    STATE_IN_PROGRESS,
+    STATE_SUCCESS,
+    STATE_PENDING,
+    STATE_IN_SYNC
+)
 from nsx_t_plugin.utils import (
     validate_if_resource_started,
-    validate_if_resource_deleted
+    validate_if_resource_deleted,
 )
 from nsx_t_sdk.resources import Tier1, Tier1state
 
@@ -34,7 +40,12 @@ def create(nsx_t_resource):
 
 @with_nsx_t_client(Tier1state)
 def start(nsx_t_resource):
-    validate_if_resource_started('Tier1', nsx_t_resource)
+    validate_if_resource_started(
+        'Tier1',
+        nsx_t_resource,
+        [STATE_IN_PROGRESS, STATE_PENDING],
+        [STATE_SUCCESS, STATE_IN_SYNC]
+    )
 
 
 @with_nsx_t_client(Tier1)
