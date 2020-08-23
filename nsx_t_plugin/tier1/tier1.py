@@ -34,7 +34,7 @@ def create(nsx_t_resource):
 
 @with_nsx_t_client(Tier1state)
 def start(nsx_t_resource):
-    validate_if_resource_started(nsx_t_resource)
+    validate_if_resource_started('Tier1', nsx_t_resource)
 
 
 @with_nsx_t_client(Tier1)

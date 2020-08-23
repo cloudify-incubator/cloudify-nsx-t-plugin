@@ -168,7 +168,7 @@ def validate_if_resource_started(resource_name, nsx_t_state):
     :param nsx_t_state: Instance derived from "NSXTResource" class
     """
     resource_state = nsx_t_state.get()
-    state = resource_state.state
+    state = getattr(resource_state, resource_state.state_attr, 'state')
     if state in [STATE_PENDING, STATE_IN_PROGRESS]:
         raise OperationRetry(
             '{0} state '

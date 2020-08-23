@@ -16,6 +16,17 @@
 from nsx_t_sdk.common import NSXTResource
 
 
+class State(NSXTResource):
+    service_name = 'State'
+    state_attr = 'state'
+    allow_create = False
+    allow_delete = False
+    allow_get = True
+    allow_list = False
+    allow_update = False
+    allow_patch = False
+
+
 class Segment(NSXTResource):
     client_type = 'nsx_infra'
     resource_type = 'Segment'
@@ -35,17 +46,9 @@ class SegmentPort(NSXTResource):
     allow_patch = False
 
 
-class SegmentState(NSXTResource):
+class SegmentState(State):
     client_type = 'segment'
     resource_type = 'SegmentState'
-    service_name = 'State'
-
-    allow_create = False
-    allow_delete = False
-    allow_get = True
-    allow_list = False
-    allow_update = False
-    allow_patch = False
 
 
 class DhcpServerConfig(NSXTResource):
@@ -63,11 +66,4 @@ class Tier1(NSXTResource):
 class Tier1state(NSXTResource):
     client_type = 'tier_1'
     resource_type = 'Tier1State'
-    service_name = 'State'
-
-    allow_create = False
-    allow_delete = False
-    allow_get = True
-    allow_list = False
-    allow_update = False
-    allow_patch = False
+    state_attr = 'tier1_state'

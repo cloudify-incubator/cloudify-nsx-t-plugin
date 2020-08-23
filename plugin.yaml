@@ -558,6 +558,8 @@ data_types:
         required: false
         description: >
           Opaque identifiers meaningful to the API user
+
+
 node_types:
   cloudify.nodes.nsx-t.Segment:
     derived_from: cloudify.nodes.Network
@@ -602,7 +604,7 @@ node_types:
           implementation: nsx-t.nsx_t_plugin.dhcp_server.dhcp_server_config.delete
 
   cloudify.nodes.nsx-t.Tier1:
-    derived_from: cloudify.nodes.Root
+    derived_from: cloudify.nodes.Router
     properties:
       <<: *client_config
       resource_config:
