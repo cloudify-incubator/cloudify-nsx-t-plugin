@@ -13,20 +13,21 @@
 #    * See the License for the specific language governing permissions and
 #    * limitations under the License.
 
-from cloudify.exceptions import NonRecoverableError
+from cloudify import ctx
+from cloudify.exceptions import NonRecoverableError, OperationRetry
 from cloudify.constants import NODE_INSTANCE, RELATIONSHIP_INSTANCE
 
-DELETE_OPERATION = 'cloudify.interfaces.lifecycle.delete'
-CREATE_OPERATION = 'cloudify.interfaces.lifecycle.create'
-
-BASIC_RUNTIME_PROPERTIES = (
-    'id',
-    'resource_type'
+from nsx_t_sdk.exceptions import NSXTSDKException
+from nsx_t_sdk._compat import text_type
+from nsx_t_plugin.constants import TASK_DELETE
+from nsx_t_plugin.constants import (
+    DELETE_OPERATION,
+    CREATE_OPERATION,
+    NSXT_ID_PROPERTY,
+    NSXT_NAME_PROPERTY,
+    NSXT_TYPE_PROPERTY,
+    NSXT_RESOURCE_CONFIG_PROPERTY
 )
-NSXT_ID_PROPERTY = 'id'
-NSXT_NAME_PROPERTY = 'name'
-NSXT_TYPE_PROPERTY = 'type'
-NSXT_RESOURCE_CONFIG_PROPERTY = 'resource_config'
 
 
 def get_relationship_subject_context(_ctx):
@@ -156,3 +157,87 @@ def update_runtime_properties_for_instance(nsx_t_resource, _ctx, operation):
         set_basic_runtime_properties_for_instance(nsx_t_resource, _ctx)
     elif operation == DELETE_OPERATION:
         delete_runtime_properties_from_instance(_ctx)
+
+
+def validate_if_resource_started(
+        resource_name,
+        nsx_t_state,
+        pending_states,
+        ready_states
+):
+    """
+    This method will validate if the nsx_t_resource is ready to use and started
+    :param resource_name: The name of the resource we need to get state for
+    :param nsx_t_state: Instance derived from "NSXTResource" class
+    :param pending_states: List of pending state to wait for
+    :param ready_states: List of ready states to say that resource is ready
+    """
+    resource_state = nsx_t_state.get()
+    state = getattr(resource_state, nsx_t_state.state_attr, 'state')
+    if not isinstance(state, text_type):
+        state = state.state
+    if state in pending_states:
+        raise OperationRetry(
+            '{0} state '
+            'is still in {1}'.format(resource_name, state)
+        )
+    elif state in ready_states:
+        ctx.logger.info('{0} started successfully'
+                        ''.format(resource_name))
+    else:
+        raise NonRecoverableError(
+            '{0} failed to start {1}'.format(
+                resource_name,
+                state
+            )
+        )
+
+
+def validate_if_resource_deleted(nsx_t_resource):
+    """
+    This method will validate if the NSXT resource get deleted or not
+    :param nsx_t_resource: Instance derived from "NSXTResource" class
+    """
+    try:
+        nsx_t_resource.get()
+    except NSXTSDKException:
+        ctx.logger.info(
+            '{0} {1} is deleted successfully'.format(
+                nsx_t_resource.resource_type,
+                nsx_t_resource.resource_id
+            )
+        )
+        return
+
+    if TASK_DELETE not in ctx.instance.runtime_properties:
+        try:
+            nsx_t_resource.delete()
+        except NSXTSDKException:
+            ctx.logger.info(
+                '{0} {1} cannot be deleted now, try again'
+                ''.format(
+                    nsx_t_resource.resource_type,
+                    nsx_t_resource.resource_id
+                )
+            )
+            raise OperationRetry(
+                message='{0} {1} deletion is in progress.'.format(
+                    nsx_t_resource.resource_type,
+                    nsx_t_resource.resource_id
+                )
+            )
+        else:
+            ctx.instance.runtime_properties[TASK_DELETE] = True
+    else:
+        ctx.logger.info(
+            'Waiting for {0} "{1}" to be deleted'.format(
+                nsx_t_resource.resource_type,
+                nsx_t_resource.resource_id,
+            )
+        )
+        raise OperationRetry(
+            message='{0} {1} deletion is in progress.'
+                    ''.format(nsx_t_resource.resource_type,
+                              nsx_t_resource.resource_id
+                              )
+        )

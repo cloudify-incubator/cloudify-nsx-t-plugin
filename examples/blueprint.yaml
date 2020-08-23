@@ -20,8 +20,8 @@ inputs:
   password:
     type: string
 
-  tier1_gateway_id:
-    type: string
+  tier1_config:
+    type: dict
 
   dhcp_server_config:
     type: dict
@@ -68,12 +68,21 @@ dsl_definitions:
     allow_insecure: true
 
 node_templates:
+  tier1:
+    type: cloudify.nodes.nsx-t.Tier1
+    properties:
+      client_config: *client_config
+      resource_config: { get_input: tier1_config }
+
   dhcb_server_config:
     type: cloudify.nodes.nsx-t.DhcpServerConfig
     properties:
       client_config: *client_config
-      tier1_gateway_id: { get_input: tier1_gateway_id }
+      tier1_gateway_id: { get_attribute: [ tier1, id ] }
       resource_config: { get_input: dhcp_server_config }
+    relationships:
+      - type: cloudify.relationships.depends_on
+        target: tier1
 
   segment:
     type: cloudify.nodes.nsx-t.Segment
