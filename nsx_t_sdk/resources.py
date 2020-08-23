@@ -63,7 +63,7 @@ class Tier1(NSXTResource):
     service_name = 'Tier1s'
 
 
-class Tier1state(NSXTResource):
+class Tier1state(State):
     client_type = 'tier_1'
     resource_type = 'Tier1State'
     state_attr = 'tier1_state'
