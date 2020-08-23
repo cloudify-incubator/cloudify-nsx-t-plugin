@@ -10,6 +10,10 @@ The plugin provides the following features for interacting with NSX-T API:
 2. DHCP Server Config:
    - Create DHCP Server Config
    - Delete DHCP Server Config
+ 
+3. Tier1 Gateway:
+   - Create Tier1 Gateway
+   - Delete Tier1 Gateway
 
 ## Authentication with NSX-T
 
@@ -65,6 +69,7 @@ This node type refers to a DHCP Server Config.
 
   * `id`: _String_. _Required_. This is the ID of the DHCP Server Config
   * `display_name`: _String_. _Not required_. The name of DHCP Server Config. if not provided, it will take the same ID value.
+  * `description`: _String_. _Not required_. The resource  description.
   * `edge_cluster_path`: _String_. Edge cluster path
   * `lease_time`: _Integer_. IP address lease time in seconds.
   * `server_addresses`: _List_: DHCP server address in CIDR format. Both IPv4 and IPv6 address families are supported.
@@ -100,6 +105,7 @@ This node type refers to a Segment.
 
   * `id`: _String_. _Required_. This is the ID of the Segment
   * `display_name`: _String_. _Not required_. The name of Segment. if not provided, it will take the same ID value.
+  * `description`: _String_. _Not required_. The Segment description.
   * `subnet`: _Dict_: Segment Subnet Configuration. The following keys are part of `subnet`:
      - `ip_v4_config`: _Dict_:  IP V4 Configuration.
         - `dhcp_config`: _Dict_: The DHCP Configuration
@@ -186,6 +192,55 @@ This node type refers to a Segment.
         target: dhcb_server_config
 ```
 
+### **cloudify.nodes.nsx-t.Tier1**
+
+This node type refers to a Tier1 Gateway.
+
+**Resource Config**
+
+  * `id`: _String_. _Required_. This is the ID of the Tier1 Gateway
+  * `display_name`: _String_. _Not required_. The name of Tier1 Gateway. if not provided, it will take the same ID value.
+  * `tier0_path`: _String_. _Not required_. Specify Tier-1 connectivity to Tier-0 instance.
+  * `type`: _String_. Tier1 connectivity type for reference.
+  * `dhcp_config_paths`: _List_. DHCP configuration for Segments connected to Tier-1
+  * `disable_firewall`: _Boolean_: Disable or enable gateway firewall. Default False
+  * `enable_standby_relocation`: _Boolean_: Flag to enable standby service router relocation.
+  * `failover_mode`: _String_: Determines the behavior when a Tier-1 instance restarts after a failure. Default NON_PREEMPTIVE
+  * `intersite_config`: _Dict_: Inter site routing configuration when the gateway is streched.
+     * `fallback_sites`: _List_: Fallback site to be used as new primary site on current primary site failure.
+     * `intersite_transit_subnet`: _String_: IPv4 subnet for inter-site transit segment connecting service routers across sites for stretched gateway. Default `169.254.32.0/20`
+     * `last_admin_active_epoch`: _Integer_: Epoch(in seconds) is auto updated based on system current timestamp when primary locale service is updated
+     * `primary_site_path`: _String_: Primary egress site for gateway.
+  * `ipv6_profile_paths`: _List_: Configuration IPv6 NDRA and DAD profiles . Either or both NDRA and/or DAD profiles can be configured.
+  * `pool_allocation`: _String_: Supports edge node allocation at different sizes for routing and load balancer service to meet performance and scalability requirements. Default ROUTING
+  * `qos_profile`: _Dict_: QoS Profile configuration for Tier1 router link connected to Tier0 gateway.
+     * `egress_qos_profile_path`: _String_: Policy path to gateway QoS profile in egress direction.
+     * `ingress_qos_profile_path`: _String_: Policy path to gateway QoS profile in ingress direction.
+  * `route_advertisement_rules`: _List_: Route advertisement rules and filtering.
+  * `route_advertisement_types`: _List_: Enable different types of route advertisements.
+  * `children`: _List_: subtree for this type within policy tree containing nested elements.
+  * `tags`: _List_: Opaque identifiers meaningful to the API user
+
+
+### Tier1 Example  
+
+```yaml
+  tier1:
+    type: cloudify.nodes.nsx-t.Tier1
+    properties:
+      client_config:
+        host: { get_input: host }
+        port: { get_input: port }
+        username: { get_input: username }
+        password: { get_input: password }
+      resource_config:
+          id: test_tier1
+          display_name: Test Tier1 Router
+          description: Test Tier1 Router
+          tier0_path:{ get_input: tier0_path }
+```
+
 Note: The configuration for the above resources are based on the NSX-T API documentation:
-   1. https://vdc-download.vmware.com/vmwb-repository/dcr-public/9e1c6bcc-85db-46b6-bc38-d6d2431e7c17/30af91b5-3a91-4d5d-8ed5-a7d806764a16/api_includes/method_CreateOrReplaceInfraSegment.html
-   2. https://vdc-download.vmware.com/vmwb-repository/dcr-public/9e1c6bcc-85db-46b6-bc38-d6d2431e7c17/30af91b5-3a91-4d5d-8ed5-a7d806764a16/api_includes/method_CreateOrReplaceDhcpServerConfig.html
+   1. https://vdc-download.vmware.com/vmwb-repository/dcr-public/9e1c6bcc-85db-46b6-bc38-d6d2431e7c17/30af91b5-3a91-4d5d-8ed5-a7d806764a16/api_includes/policy_networking_connectivity_segment.html
+   2. https://vdc-download.vmware.com/vmwb-repository/dcr-public/9e1c6bcc-85db-46b6-bc38-d6d2431e7c17/30af91b5-3a91-4d5d-8ed5-a7d806764a16/api_includes/policy_networking_ip_management_dhcp_dhcp_server_configs.html
+   3. https://vdc-download.vmware.com/vmwb-repository/dcr-public/9e1c6bcc-85db-46b6-bc38-d6d2431e7c17/30af91b5-3a91-4d5d-8ed5-a7d806764a16/api_includes/policy_networking_connectivity_tier-1_gateways_tier-1_gateways.html
