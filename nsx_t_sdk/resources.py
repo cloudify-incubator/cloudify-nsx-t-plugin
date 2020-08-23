@@ -37,7 +37,7 @@ class SegmentPort(NSXTResource):
 
 class SegmentState(NSXTResource):
     client_type = 'segment'
-    resource_type = 'State'
+    resource_type = 'SegmentState'
     service_name = 'State'
 
     allow_create = False
@@ -58,3 +58,16 @@ class Tier1(NSXTResource):
     client_type = 'nsx_infra'
     resource_type = 'Tier1'
     service_name = 'Tier1s'
+
+
+class Tier1state(NSXTResource):
+    client_type = 'tier_1'
+    resource_type = 'Tier1State'
+    service_name = 'State'
+
+    allow_create = False
+    allow_delete = False
+    allow_get = True
+    allow_list = False
+    allow_update = False
+    allow_patch = False

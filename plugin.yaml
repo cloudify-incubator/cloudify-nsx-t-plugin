@@ -402,13 +402,161 @@ data_types:
         required: false
         description: >
           subtree for this type within policy tree containing nested elements.
-          https://vdc-download.vmware.com/vmwb-repository/dcr-public/9e1c6bcc-85db-46b6-bc38-d6d2431e7c17/30af91b5-3a91-4d5d-8ed5-a7d806764a16/api_includes/method_PatchInfraSegment.html
       tags:
         type: list
         required: false
         description: >
           Opaque identifiers meaningful to the API user
 
+  cloudift.types.nsx-t.IntersiteGatewayConfig:
+    properties:
+      fallback_sites:
+        type: list
+        required: false
+        default: []
+        description: >
+          Fallback site to be used as new primary site on current primary site
+          failure. Disaster recovery must be initiated via API/UI. Fallback site
+          configuration is supported only for T0 gateway. T1 gateway will follow
+          T0 gateway's primary site during disaster recovery.
+      intersite_transit_subnet:
+        type: string
+        default: 169.254.32.0/20
+        required: false
+        description: >
+          IPv4 subnet for inter-site transit segment connecting service routers
+          across sites for stretched gateway. For IPv6 link local subnet is
+          auto configured.
+      last_admin_active_epoch:
+        type: integer
+        required: false
+        description: >
+          Epoch(in seconds) is auto updated based on system current timestamp
+          when primary locale service is updated. It is used for resolving conflict
+          during site failover. If system clock not in sync then User can optionally
+          override this. New value must be higher than the current value
+      primary_site_path:
+        type: string
+        required: false
+        description: >
+          Primary egress site for gateway. T0/T1 gateway in Active/Standby mode
+          supports stateful services on primary site. In this mode primary site
+          must be set if gateway is stretched to more than one site. For T0 gateway
+          in Active/Active primary site is optional field. If set then secondary site
+          prefers routes learned from primary over locally learned routes. This field
+          is not applicable for T1 gateway with no services.
+  cloudift.types.nsx-t.GatewayQosProfileConfig:
+    egress_qos_profile_path:
+      type: string
+      required: false
+      description: >
+        Policy path to gateway QoS profile in egress direction.
+    ingress_qos_profile_path:
+      type: string
+      required: false
+      description: >
+        Policy path to gateway QoS profile in ingress direction
+  cloudify.types.nsx-t.Tier1:
+    properties:
+      <<: *data_type_id
+      <<: *data_type_name
+      <<: *data_type_description
+      tier0_path:
+        type: string
+        required: false
+        description: >
+          Specify Tier-1 connectivity to Tier-0 instance.
+      type:
+        type: string
+        required: false
+        description: >
+          Tier1 connectivity type for reference. Property value is not validated
+          with Tier1 configuration.
+          ROUTED: Tier1 is connected to Tier0 gateway and routing is enabled.
+          ISOLATED: Tier1 is not connected to any Tier0 gateway.
+          NATTED: Tier1 is in ROUTED type with NAT configured locally.
+      dhcp_config_paths:
+        type: list
+        required: false
+        default: []
+        description: >
+          DHCP configuration for Segments connected to Tier-1. DHCP service is
+          enabled in relay mode.
+      disable_firewall:
+        type: boolean
+        default: false
+        required: false
+        description: >
+          Disable or enable gateway firewall.
+      enable_standby_relocation:
+        type: boolean
+        default: false
+        required: false
+        description: >
+          Flag to enable standby service router relocation.
+          Standby relocation is not enabled until edge cluster is configured
+          for Tier1.
+      failover_mode:
+        type: string
+        default: NON_PREEMPTIVE
+        required: false
+        description: >
+          Determines the behavior when a Tier-1 instance restarts after a
+          failure. If set to PREEMPTIVE, the preferred node will take over,
+          even if it causes another failure. If set to NON_PREEMPTIVE,
+          then the instance that restarted will remain secondary.
+          Only applicable when edge cluster is configured in Tier1
+          locale-service.
+      intersite_config:
+        type: cloudift.types.nsx-t.IntersiteGatewayConfig
+        required: false
+        description: >
+          Inter site routing configuration when the gateway is streched.
+      ipv6_profile_paths:
+        type: list
+        required: false
+        description: >
+          Configuration IPv6 NDRA and DAD profiles. Either or both
+          NDRA and/or DAD profiles can be configured.
+      pool_allocation:
+        type: string
+        default: ROUTING
+        required: false
+        description: >
+          Supports edge node allocation at different sizes for routing and
+          load balancer service to meet performance and scalability requirements.
+          ROUTING: Allocate edge node to provide routing services.
+          LB_SMALL, LB_MEDIUM, LB_LARGE, LB_XLARGE: Specify size of load balancer
+          service that will be configured on TIER1 gateway.
+      qos_profile:
+        type: cloudift.types.nsx-t.GatewayQosProfileConfig
+        required: false
+        description: >
+          QoS Profile configuration for Tier1 router link connected to Tier0 gateway.
+      route_advertisement_rules:
+        type: list
+        required: false
+        default: []
+        description: >
+          Route advertisement rules and filtering
+      route_advertisement_types:
+        type: list
+        required: false
+        default: []
+        description: >
+          Enable different types of route advertisements.
+          When not specified, routes to IPSec VPN local-endpoint subnets
+          (TIER1_IPSEC_LOCAL_ENDPOINT) are automatically advertised.
+      children:
+        type: list
+        required: false
+        description: >
+          subtree for this type within policy tree containing nested elements.
+      tags:
+        type: list
+        required: false
+        description: >
+          Opaque identifiers meaningful to the API user
 node_types:
   cloudify.nodes.nsx-t.Segment:
     derived_from: cloudify.nodes.Network
@@ -451,6 +599,23 @@ node_types:
           implementation: nsx-t.nsx_t_plugin.dhcp_server.dhcp_server_config.stop
         delete:
           implementation: nsx-t.nsx_t_plugin.dhcp_server.dhcp_server_config.delete
+
+  cloudify.nodes.nsx-t.Tier1:
+    properties:
+      <<: *client_config
+      resource_config:
+        type: cloudify.types.nsx-t.Tier1
+        required: true
+        description: A dictionary in order to create Tier1 resource
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: nsx-t.nsx_t_plugin.tier1.tier1.create
+        start:
+          implementation: nsx-t.nsx_t_plugin.tier1.tier1.start
+        delete:
+          implementation: nsx-t.nsx_t_plugin.tier1.tier1.delete
+
 
 relationships:
   cloudify.relationships.nsx-t.segment_connected_to_dhcp_server_config:
