@@ -24,6 +24,8 @@ segment_config:
   display_name: Test Segment
   description: Test Segment Config
   transport_zone_path: /infra/sites/default/enforcement-points/default/transport-zones/1b3a2f36-bfd1-443e-a0f6-4de01abc963e
+  connectivity_path: /infra/tier-1s/test_tier1
+  dhcp_config_path: /infra/dhcp-server-configs/test_dhcp_server
   subnet:
     ip_v4_config:
       dhcp_config:

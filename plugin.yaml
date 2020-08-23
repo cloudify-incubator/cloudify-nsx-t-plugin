@@ -446,16 +446,17 @@ data_types:
           prefers routes learned from primary over locally learned routes. This field
           is not applicable for T1 gateway with no services.
   cloudift.types.nsx-t.GatewayQosProfileConfig:
-    egress_qos_profile_path:
-      type: string
-      required: false
-      description: >
-        Policy path to gateway QoS profile in egress direction.
-    ingress_qos_profile_path:
-      type: string
-      required: false
-      description: >
-        Policy path to gateway QoS profile in ingress direction
+    properties:
+      egress_qos_profile_path:
+        type: string
+        required: false
+        description: >
+          Policy path to gateway QoS profile in egress direction.
+      ingress_qos_profile_path:
+        type: string
+        required: false
+        description: >
+          Policy path to gateway QoS profile in ingress direction
   cloudify.types.nsx-t.Tier1:
     properties:
       <<: *data_type_id
@@ -601,6 +602,7 @@ node_types:
           implementation: nsx-t.nsx_t_plugin.dhcp_server.dhcp_server_config.delete
 
   cloudify.nodes.nsx-t.Tier1:
+    derived_from: cloudify.nodes.Root
     properties:
       <<: *client_config
       resource_config:
