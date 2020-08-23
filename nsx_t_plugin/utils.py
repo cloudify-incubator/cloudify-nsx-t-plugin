@@ -18,6 +18,7 @@ from cloudify.exceptions import NonRecoverableError, OperationRetry
 from cloudify.constants import NODE_INSTANCE, RELATIONSHIP_INSTANCE
 
 from nsx_t_sdk.exceptions import NSXTSDKException
+from nsx_t_sdk._compat import text_type
 from nsx_t_plugin.constants import TASK_DELETE
 from nsx_t_plugin.constants import (
     DELETE_OPERATION,
@@ -28,7 +29,8 @@ from nsx_t_plugin.constants import (
     NSXT_RESOURCE_CONFIG_PROPERTY,
     STATE_IN_PROGRESS,
     STATE_SUCCESS,
-    STATE_PENDING
+    STATE_PENDING,
+    STATE_IN_SYNC
 )
 
 
@@ -168,8 +170,10 @@ def validate_if_resource_started(resource_name, nsx_t_state):
     :param nsx_t_state: Instance derived from "NSXTResource" class
     """
     resource_state = nsx_t_state.get()
-    state = getattr(resource_state, resource_state.state_attr, 'state')
-    if state in [STATE_PENDING, STATE_IN_PROGRESS]:
+    state = getattr(resource_state, nsx_t_state.state_attr, 'state')
+    if not isinstance(state, text_type):
+        state = state.state
+    if state in [STATE_PENDING, STATE_IN_PROGRESS, STATE_IN_SYNC]:
         raise OperationRetry(
             '{0} state '
             'is still in {1}'.format(resource_name, state)

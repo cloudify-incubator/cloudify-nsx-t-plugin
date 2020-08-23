@@ -16,6 +16,7 @@
 # STATE VALUES
 STATE_PENDING = 'pending'
 STATE_IN_PROGRESS = 'in_progress'
+STATE_IN_SYNC = 'in_sync'
 STATE_SUCCESS = 'success'
 
 # SEGMENTS
