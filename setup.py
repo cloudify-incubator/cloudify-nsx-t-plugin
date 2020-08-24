@@ -20,7 +20,7 @@ from setuptools import find_packages
 
 setup(
     name='cloudify-nsx-t-plugin',
-    version='0.2.0',
+    version='0.2.1',
     author='Cloudify Platform Ltd.',
     author_email='hello@cloudify.co',
     license='LICENSE',
