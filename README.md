@@ -146,7 +146,7 @@ This node type refers to a Segment.
   * `overlay_id`: _String_: Overlay connectivity ID for this Segment Used for overlay connectivity of segments.
   * `tags`: _List_: Opaque identifiers meaningful to the API user by having pairs of scope and tag.
   * `children`: _List_: subtree for this type within policy tree containing nested elements.
-  * `address_bindings`: _List_: Address bindings for the Logical switch. Array of PacketAddressClassifier https://vdc-download.vmware.com/vmwb-repository/dcr-public/9e1c6bcc-85db-46b6-bc38-d6d2431e7c17/30af91b5-3a91-4d5d-8ed5-a7d806764a16/api_includes/types_PacketAddressClassifier.html
+  * `address_bindings`: _List_: Address bindings for the Logical switch. Array of (PacketAddressClassifier)[https://vdc-download.vmware.com/vmwb-repository/dcr-public/9e1c6bcc-85db-46b6-bc38-d6d2431e7c17/30af91b5-3a91-4d5d-8ed5-a7d806764a16/api_includes/types_PacketAddressClassifier.html]
   * `bridge_profiles`: _List_: Bridge Profile Configuration Multiple distinct L2 bridge profiles can be configured.
   * `advanced_config`: _Dict_: Advanced configuration for Segment.
   * `vlan_ids`: _List_: VLAN ids for VLAN backed Segment. Can be a VLAN id or a range of VLAN ids specified with '-' in between.
