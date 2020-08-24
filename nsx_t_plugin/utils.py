@@ -18,7 +18,6 @@ from cloudify.exceptions import NonRecoverableError, OperationRetry
 from cloudify.constants import NODE_INSTANCE, RELATIONSHIP_INSTANCE
 
 from nsx_t_sdk.exceptions import NSXTSDKException
-from nsx_t_sdk._compat import text_type
 from nsx_t_plugin.constants import (
     DELETE_OPERATION,
     CREATE_OPERATION,
@@ -173,8 +172,7 @@ def validate_if_resource_started(
     """
     resource_state = nsx_t_state.get()
     state = getattr(resource_state, nsx_t_state.state_attr, 'state')
-    if not isinstance(state, text_type):
-        state = state.state
+    state = state.state if hasattr(state, 'state') else state
     if state in pending_states:
         raise OperationRetry(
             '{0} state '
