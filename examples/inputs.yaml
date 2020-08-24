@@ -5,24 +5,24 @@ username: -YOUR_USERNAME-
 password: -YOUR_PASSWORD-
 
 tier1_config:
-  id: mo_tier1
-  display_name: MO Tier1 Router
-  description: MO Tier1 Router
+  id: test_tier1
+  display_name: Test Tier1 Router
+  description: Test Tier1 Router
   tier0_path: /infra/tier-0s/tier0
 
 dhcp_server_config:
-  id: mo_dhcp_server
-  display_name: MO DHCP Server
-  description: MO DHCP Server Config
+  id: test_dhcp_server
+  display_name: Test DHCP Server
+  description: Test DHCP Server Config
   edge_cluster_path: /infra/sites/default/enforcement-points/default/edge-clusters/272cfe43-ebcc-49bb-8471-62a261ed8931
   tags:
     - scope: Name
-      tag: MO DHCP
+      tag: Test DHCP
 
 segment_config:
-  id: mo_segment
-  display_name: MO Segment
-  description: MO Segment Config
+  id: test_segment
+  display_name: Test Segment
+  description: Test Segment Config
   transport_zone_path: /infra/sites/default/enforcement-points/default/transport-zones/1b3a2f36-bfd1-443e-a0f6-4de01abc963e
   connectivity_path: { get_attribute: [ tier1, path ] }
   dhcp_config_path: { get_attribute: [ dhcb_server_config, path ] }
@@ -33,9 +33,13 @@ segment_config:
         lease_time: 86400
         resource_type: SegmentDhcpV4Config
       gateway_address: 192.168.11.12/24
+      dhcp_ranges:
+        - 192.168.11.100-192.168.11.160
     ip_v6_config:
       dhcp_config:
         server_address: fc7e:f206:db42::6/48
         lease_time: 86400
         resource_type: SegmentDhcpV6Config
       gateway_address: fc7e:f206:db42::2/48
+      dhcp_ranges:
+        - fc7e:f206:db42::15-fc7e:f206:db42::200
