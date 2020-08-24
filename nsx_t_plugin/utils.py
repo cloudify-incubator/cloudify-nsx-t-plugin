@@ -19,7 +19,6 @@ from cloudify.constants import NODE_INSTANCE, RELATIONSHIP_INSTANCE
 
 from nsx_t_sdk.exceptions import NSXTSDKException
 from nsx_t_sdk._compat import text_type
-from nsx_t_plugin.constants import TASK_DELETE
 from nsx_t_plugin.constants import (
     DELETE_OPERATION,
     CREATE_OPERATION,
@@ -209,25 +208,15 @@ def validate_if_resource_deleted(nsx_t_resource):
         )
         return
 
-    if TASK_DELETE not in ctx.instance.runtime_properties:
-        try:
-            nsx_t_resource.delete()
-        except NSXTSDKException:
-            ctx.logger.info(
-                '{0} {1} cannot be deleted now, try again'
-                ''.format(
-                    nsx_t_resource.resource_type,
-                    nsx_t_resource.resource_id
-                )
+    try:
+        nsx_t_resource.delete()
+    except NSXTSDKException:
+        raise OperationRetry(
+            message='{0} {1} deletion is in progress.'.format(
+                nsx_t_resource.resource_type,
+                nsx_t_resource.resource_id
             )
-            raise OperationRetry(
-                message='{0} {1} deletion is in progress.'.format(
-                    nsx_t_resource.resource_type,
-                    nsx_t_resource.resource_id
-                )
-            )
-        else:
-            ctx.instance.runtime_properties[TASK_DELETE] = True
+        )
     else:
         ctx.logger.info(
             'Waiting for {0} "{1}" to be deleted'.format(
