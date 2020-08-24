@@ -77,6 +77,9 @@ This node type refers to a DHCP Server Config.
   * `children`: _List_: subtree for this type within policy tree containing nested elements.
   * `tags`: _List_: Opaque identifiers meaningful to the API user by having pairs of scope and tag.
 
+**Properties**
+
+  * `tier1_gateway_id`: _String_: The ID of the Tier 1 Gateway to connect DHCP to
 
 ### DHCP Server Config Example
 
@@ -241,6 +244,6 @@ This node type refers to a Tier1 Gateway.
 ```
 
 Note: The configuration for the above resources are based on the NSX-T API documentation:
-   1. https://vdc-download.vmware.com/vmwb-repository/dcr-public/9e1c6bcc-85db-46b6-bc38-d6d2431e7c17/30af91b5-3a91-4d5d-8ed5-a7d806764a16/api_includes/policy_networking_connectivity_segment.html
-   2. https://vdc-download.vmware.com/vmwb-repository/dcr-public/9e1c6bcc-85db-46b6-bc38-d6d2431e7c17/30af91b5-3a91-4d5d-8ed5-a7d806764a16/api_includes/policy_networking_ip_management_dhcp_dhcp_server_configs.html
-   3. https://vdc-download.vmware.com/vmwb-repository/dcr-public/9e1c6bcc-85db-46b6-bc38-d6d2431e7c17/30af91b5-3a91-4d5d-8ed5-a7d806764a16/api_includes/policy_networking_connectivity_tier-1_gateways_tier-1_gateways.html
+   1. [Segment Endpoints](https://vdc-download.vmware.com/vmwb-repository/dcr-public/9e1c6bcc-85db-46b6-bc38-d6d2431e7c17/30af91b5-3a91-4d5d-8ed5-a7d806764a16/api_includes/policy_networking_connectivity_segment.html)
+   2. [DHCP Server Endpoints](https://vdc-download.vmware.com/vmwb-repository/dcr-public/9e1c6bcc-85db-46b6-bc38-d6d2431e7c17/30af91b5-3a91-4d5d-8ed5-a7d806764a16/api_includes/policy_networking_ip_management_dhcp_dhcp_server_configs.html)
+   3. [Tier1 Endpoints](https://vdc-download.vmware.com/vmwb-repository/dcr-public/9e1c6bcc-85db-46b6-bc38-d6d2431e7c17/30af91b5-3a91-4d5d-8ed5-a7d806764a16/api_includes/policy_networking_connectivity_tier-1_gateways_tier-1_gateways.html)
