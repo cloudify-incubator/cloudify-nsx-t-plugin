@@ -113,3 +113,30 @@ node_templates:
     relationships:
       - type: cloudify.relationships.depends_on
         target: segment
+
+  virtual_machine_inventory:
+    type: cloudify.nodes.nsx-t.inventory.VirtualMachine
+    properties:
+      client_config: *client_config
+      resource_config:
+        vm_name: { get_attribute: [ host, name ] }
+        network_name: { get_attribute: [ segment, name ] }
+    relationships:
+      - type: cloudify.relationships.nsx-t.inventory_connected_to_server
+        target: host
+
+outputs:
+  target_network:
+    value: { get_attribute: [ virtual_machine_inventory, { get_attribute: [ segment, name ] ] }
+
+  networks:
+    value: { get_attribute: [ virtual_machine_inventory, networks ] }
+
+  server_mac_address:
+    value: { get_attribute: [ virtual_machine_inventory, { get_attribute: [ segment, name ] }, mac_address ] }
+
+  server_ipv4_address:
+    value: { get_attribute: [ virtual_machine_inventory, { get_attribute: [ segment,  name ] }, ipv4_addresses, 0 ] }
+
+  server_ipv6_address:
+    value: { get_attribute: [ virtual_machine_inventory, { get_attribute: [ segment, name ] }, ipv6_addresses, 0 ] }
