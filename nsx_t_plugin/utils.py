@@ -131,13 +131,16 @@ def set_basic_runtime_properties_for_instance(nsx_t_resource, _ctx):
     RelationshipSubjectContext or CloudifyContext
     """
     if _ctx and nsx_t_resource:
-        resource_config = nsx_t_resource.get().to_dict()
+        resource_config = nsx_t_resource.get()
         _ctx.instance.runtime_properties[
             NSXT_TYPE_PROPERTY] = nsx_t_resource.resource_type
         _ctx.instance.runtime_properties[
             NSXT_ID_PROPERTY] = nsx_t_resource.resource_id
         _ctx.instance.runtime_properties[
-            NSXT_NAME_PROPERTY] = resource_config['display_name']
+            NSXT_NAME_PROPERTY] = \
+            resource_config.get('display_name') or\
+            resource_config.get('id') or\
+            nsx_t_resource.resource_id
         _ctx.instance.runtime_properties[
             NSXT_RESOURCE_CONFIG_PROPERTY] = resource_config
 
@@ -171,8 +174,9 @@ def validate_if_resource_started(
     :param ready_states: List of ready states to say that resource is ready
     """
     resource_state = nsx_t_state.get()
-    state = getattr(resource_state, nsx_t_state.state_attr, 'state')
-    state = state.state if hasattr(state, 'state') else state
+    state = resource_state[nsx_t_state.state_attr]
+    if isinstance(state, dict):
+        state = state['state']
     if state in pending_states:
         raise OperationRetry(
             '{0} state '

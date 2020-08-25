@@ -20,7 +20,7 @@ from setuptools import find_packages
 
 setup(
     name='cloudify-nsx-t-plugin',
-    version='0.2.2',
+    version='0.3.0',
     author='Cloudify Platform Ltd.',
     author_email='hello@cloudify.co',
     license='LICENSE',
@@ -33,6 +33,7 @@ setup(
         'vapi-runtime==2.14.0',
         'nsx-global-policy-python-sdk==3.0.0.0.0.15946039',
         'nsx-policy-python-sdk==3.0.0.0.0.15946039',
-        'nsx-python-sdk==3.0.0.0.0.15946039'
+        'nsx-python-sdk==3.0.0.0.0.15946039',
+        'IPy==0.81'
     ]
 )

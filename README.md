@@ -15,6 +15,10 @@ The plugin provides the following features for interacting with NSX-T API:
    - Create Tier1 Gateway
    - Delete Tier1 Gateway
 
+4. Virtual Machine:
+   - List Virtual Machines
+   - List All Virtual Network Interface Associated with VM
+
 ## Authentication with NSX-T
 
 Each node template, has a `client_config` property which stores your account credentials.
@@ -156,7 +160,6 @@ This node type refers to a Segment.
   * `cloudify.relationships.nsx-t.segment_connected_to_dhcp_server_config`:
     * `cloudify.nodes.nsx-t.DhcpServerConfig`: Depend on DHCP Server Config
 
-
 ### Segment Example
 
 ```yaml
@@ -224,7 +227,6 @@ This node type refers to a Tier1 Gateway.
   * `children`: _List_: subtree for this type within policy tree containing nested elements.
   * `tags`: _List_: Opaque identifiers meaningful to the API user
 
-
 ### Tier1 Example  
 
 ```yaml
@@ -243,7 +245,107 @@ This node type refers to a Tier1 Gateway.
           tier0_path:{ get_input: tier0_path }
 ```
 
+### **cloudify.types.nsx-t.inventory.VirtualMachine**
+
+This node type refers to a Virtual Machine resource.
+
+**Resource Config**
+  * `vm_id`: _String_. _Not required_. External VM ID.
+  * `vm_name`: _String_. _Not required_. The Name of VM.
+  * `network_id`: _String_. _Required_. The network id to get ips from.
+
+## Runtime Properties    
+
+Beside the common runtime properties, the `VirtualMachine` node type also expose the following two runtime properties:
+  * `networks`: _Dict_. Dictionary of all virtual network interfaces attached to the current vm.
+    
+    ```json
+    {
+       "Network adapter 1":{
+          "device_key":"4000",
+          "device_name":"Network adapter 1",
+          "external_id":"502a627a-2b5a-0f27-ace9-44a9b66d9692-4000",
+          "host_id":"55174c3a-412e-4083-b2f1-cf2cd265ef5b",
+          "ip_address_info":[
+             {
+                "ip_addresses":[
+                   "192.168.11.100",
+                   "2001:ab8::250:56ff:feaa:9160",
+                   "fe80::250:56ff:feaa:9160"
+                ],
+                "source":"VM_TOOLS"
+             }
+          ],
+          "lport_attachment_id":"3e660c66-7a8e-45a4-8c82-ffe3afcc7de2",
+          "mac_address":"00:50:56:aa:91:60",
+          "owner_vm_id":"502a627a-2b5a-0f27-ace9-44a9b66d9692",
+          "owner_vm_type":"REGULAR",
+          "vm_local_id_on_host":"49",
+          "_last_sync_time":1598369175580,
+          "display_name":"Network adapter 1",
+          "resource_type":"VirtualNetworkInterface",
+          "ipv4_addresses":[
+             "192.168.11.100"
+          ],
+          "ipv6_addresses":[
+             "2001:ab8::250:56ff:feaa:9160",
+             "fe80::250:56ff:feaa:9160"
+          ]
+       }
+    }
+    ```
+  
+  * The value of `network_id` is the exposed as runtime property with the following value:
+   ```json
+    {
+       "device_key":"4001",
+       "device_name":"Network adapter 2",
+       "external_id":"502a479c-e3f4-2ace-daab-4d874e8cc8b6-4001",
+       "host_id":"55174c3a-412e-4083-b2f1-cf2cd265ef5b",
+       "ip_address_info":[
+          {
+             "ip_addresses":[
+                "192.168.234.100",
+                "fe80::250:56ff:feaa:34fd"
+             ],
+             "source":"VM_TOOLS"
+          }
+       ],
+       "lport_attachment_id":"a9e26ccb-eb63-4098-bb7d-a93b6257b33f",
+       "mac_address":"00:50:56:aa:34:fd",
+       "owner_vm_id":"502a479c-e3f4-2ace-daab-4d874e8cc8b6",
+       "owner_vm_type":"REGULAR",
+       "vm_local_id_on_host":"22",
+       "_last_sync_time":1597825357509,
+       "display_name":"Network adapter 2",
+       "resource_type":"VirtualNetworkInterface"
+    }
+   ```   
+
+### VirtualMachine Example
+
+```yaml
+  virtual_machine_inventory:
+    type: cloudify.nodes.nsx-t.inventory.VirtualMachine
+    properties:
+      client_config:
+        host: { get_input: host }
+        port: { get_input: port }
+        username: { get_input: username }
+        password: { get_input: password }
+      resource_config:
+        vm_name: { get_attribute: [ host, name ] }
+        network_id: { get_attribute: [ segment, id ] }
+    relationships:
+      - type: cloudify.relationships.nsx-t.inventory_connected_to_server
+        target: host
+      - type: cloudify.relationships.depends_on
+        target: segment
+```  
+
 Note: The configuration for the above resources are based on the NSX-T API documentation:
    1. [Segment Endpoints](https://vdc-download.vmware.com/vmwb-repository/dcr-public/9e1c6bcc-85db-46b6-bc38-d6d2431e7c17/30af91b5-3a91-4d5d-8ed5-a7d806764a16/api_includes/policy_networking_connectivity_segment.html)
    2. [DHCP Server Endpoints](https://vdc-download.vmware.com/vmwb-repository/dcr-public/9e1c6bcc-85db-46b6-bc38-d6d2431e7c17/30af91b5-3a91-4d5d-8ed5-a7d806764a16/api_includes/policy_networking_ip_management_dhcp_dhcp_server_configs.html)
    3. [Tier1 Endpoints](https://vdc-download.vmware.com/vmwb-repository/dcr-public/9e1c6bcc-85db-46b6-bc38-d6d2431e7c17/30af91b5-3a91-4d5d-8ed5-a7d806764a16/api_includes/policy_networking_connectivity_tier-1_gateways_tier-1_gateways.html)
+   4. [Virtual Interface Endpoints](https://vdc-download.vmware.com/vmwb-repository/dcr-public/9e1c6bcc-85db-46b6-bc38-d6d2431e7c17/30af91b5-3a91-4d5d-8ed5-a7d806764a16/api_includes/system_administration_configuration_fabric_inventory_virtual_interfaces.html)
+   4. [Virtual Machines Endpoints](https://vdc-download.vmware.com/vmwb-repository/dcr-public/9e1c6bcc-85db-46b6-bc38-d6d2431e7c17/30af91b5-3a91-4d5d-8ed5-a7d806764a16/api_includes/method_ListVirtualMachines.html)
