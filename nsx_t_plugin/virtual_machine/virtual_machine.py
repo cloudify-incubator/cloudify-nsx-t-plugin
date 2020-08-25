@@ -128,7 +128,7 @@ def configure(nsx_t_resource):
             'network'
         )
     _populate_networks_for_virtual_machine(
-        client_config,
+        nsx_t_resource.client_config,
         owner_vm_id,
         network_name,
         networks
