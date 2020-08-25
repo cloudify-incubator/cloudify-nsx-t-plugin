@@ -577,9 +577,9 @@ data_types:
           The Name of VM.
         type: string
         required: false
-      network_name:
+      network_id:
         description: >
-          The network name to get ips from.
+          The network id to get ips from.
         type: string
         required: true
 

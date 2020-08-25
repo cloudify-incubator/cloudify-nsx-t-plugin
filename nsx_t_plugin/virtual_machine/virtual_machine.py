@@ -69,10 +69,10 @@ def _get_target_network(ports, network):
 def _populate_networks_for_virtual_machine(
         client_config,
         owner_vm_id,
-        network_name,
+        network_id,
         networks
 ):
-    ports = _lookup_segment_ports(client_config, network_name)
+    ports = _lookup_segment_ports(client_config, network_id)
     if not ports:
         raise NonRecoverableError('Network {0} is not connected to any device')
     networks_obj = {}
@@ -88,17 +88,17 @@ def _populate_networks_for_virtual_machine(
         raise NonRecoverableError(
             'The selected network {0} is not '
             'attached to target virtual machine {1}'
-            ''.format(network_name, owner_vm_id)
+            ''.format(network_id, owner_vm_id)
         )
 
-    ctx.instance.runtime_properties[network_name] = target_network
+    ctx.instance.runtime_properties[network_id] = target_network
     ctx.instance.runtime_properties['networks'] = networks_obj
 
 
 @with_nsx_t_client(VirtualMachine)
 def create(nsx_t_resource):
-    network_name = nsx_t_resource.resource_config.get('network_name')
-    if not network_name:
+    network_id = nsx_t_resource.resource_config.get('network_id')
+    if not network_id:
         raise NonRecoverableError(
             'Network name is required in order '
             'to fetch the network interface attached to target '
@@ -107,7 +107,7 @@ def create(nsx_t_resource):
     ctx.logger.info(
         'Preparing resource to fetch target network interface'
         ' {0} for target virtual machine'
-        ''.format(network_name)
+        ''.format(network_id)
     )
 
 
@@ -121,7 +121,7 @@ def configure(nsx_t_resource):
     }
     # This will list all networks interface attached to specific vm
     networks = nsx_t_resource.list(filters=filters)
-    network_name = nsx_t_resource.resource_config.get('network_name')
+    network_id = nsx_t_resource.resource_config.get('network_id')
     if not networks:
         raise NonRecoverableError(
             'Virtual Machine is not attached to any '
@@ -130,6 +130,6 @@ def configure(nsx_t_resource):
     _populate_networks_for_virtual_machine(
         nsx_t_resource.client_config,
         owner_vm_id,
-        network_name,
+        network_id,
         networks
     )
