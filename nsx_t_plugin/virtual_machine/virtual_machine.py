@@ -25,7 +25,7 @@ def create(nsx_t_resource):
     network_name = nsx_t_resource.resource_config.get('network_name')
     if not network_name:
         raise NonRecoverableError(
-            'Management network is required in order '
+            'Network name is required in order '
             'to fetch the network interface attached to target '
             'virtual machine'
         )
@@ -61,7 +61,9 @@ def configure(nsx_t_resource):
         ctx.instance.runtime_properties[network_name] = networks_obj[
             'networks'][network_name]
     else:
-        raise NonRecoverableError('The network you selected {0} is not '
-                                  'attached to target virtual machine {1}'
-                                  ''.format(network_name, owner_vm_id))
+        raise NonRecoverableError(
+            'The selected network {0} is not '
+            'attached to target virtual machine {1}'
+            ''.format(network_name, owner_vm_id)
+        )
     ctx.instance.runtime_properties['networks'] = networks_obj
