@@ -24,6 +24,7 @@ from vmware.vapi.bindings.error import VapiError
 from com.vmware import nsx_policy_client
 from com.vmware import nsx_client
 from com.vmware.nsx_policy import infra_client
+from com.vmware.nsx import fabric_client
 from com.vmware.nsx_policy.infra import segments_client, tier_1s_client
 
 from nsx_t_sdk import exceptions
@@ -57,7 +58,9 @@ class NSXTResource(object):
         self.client_config = client_config
         self.logger = logger
         self.resource_config = resource_config or {}
-        self.resource_config['resource_type'] = self.resource_type
+        # Only populate resource_type if it is set
+        if self.resource_type:
+            self.resource_config['resource_type'] = self.resource_type
         self.resource_id = self.resource_config.pop('id', None)
         self._api_client = self._prepare_nsx_t_client()
 
@@ -68,7 +71,8 @@ class NSXTResource(object):
             'nsx_policy': nsx_policy_client,
             'nsx_infra': infra_client,
             'segment': segments_client,
-            'tier_1': tier_1s_client
+            'tier_1': tier_1s_client,
+            'fabric': fabric_client
         }
 
     def _get_stub_factory_for_nsx_client(self, stub_config):
@@ -214,7 +218,7 @@ class NSXTResource(object):
 
     def get(self):
         self._validate_allowed_method(self.allow_get, ACTION_GET)
-        return self._invoke(ACTION_GET, (self.resource_id,))
+        return self._invoke(ACTION_GET, (self.resource_id,)).to_dict()
 
     def list(self,
              cursor=None,

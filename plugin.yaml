@@ -16,8 +16,8 @@
 plugins:
   nsx-t:
     package_name: cloudify-nsx-t-plugin
-    source: https://github.com/Cloudify-PS/cloudify-nsx-t-plugin/archive/0.2.2.zip
-    package_version: '0.2.2'
+    source: https://github.com/Cloudify-PS/cloudify-nsx-t-plugin/archive/0.3.0.zip
+    package_version: '0.3.0'
     executor: central_deployment_agent
 
 dsl_definitions:
@@ -236,7 +236,7 @@ data_types:
         type: string
         required: false
         description: >
-           DNS domain name
+          DNS domain name
       extra_configs:
         type: list
         required: false
@@ -354,6 +354,8 @@ data_types:
           - 50-200
 
 
+
+
   cloudify.types.nsx-t.DhcpServerConfig:
     properties:
       <<: *data_type_id
@@ -408,6 +410,8 @@ data_types:
         description: >
           Opaque identifiers meaningful to the API user
 
+
+
   cloudift.types.nsx-t.IntersiteGatewayConfig:
     properties:
       fallback_sites:
@@ -445,6 +449,7 @@ data_types:
           in Active/Active primary site is optional field. If set then secondary site
           prefers routes learned from primary over locally learned routes. This field
           is not applicable for T1 gateway with no services.
+
   cloudift.types.nsx-t.GatewayQosProfileConfig:
     properties:
       egress_qos_profile_path:
@@ -457,6 +462,7 @@ data_types:
         required: false
         description: >
           Policy path to gateway QoS profile in ingress direction
+
   cloudify.types.nsx-t.Tier1:
     properties:
       <<: *data_type_id
@@ -559,8 +565,26 @@ data_types:
         description: >
           Opaque identifiers meaningful to the API user
 
+  cloudify.types.nsx-t.inventory.VirtualMachine:
+    properties:
+      vm_id:
+        description: >
+          External VM ID.
+        type: string
+        required: false
+      vm_name:
+        description: >
+          The Name of VM.
+        type: string
+        required: false
+      network_name:
+        description: >
+          The network name to get ips from.
+        type: string
+        required: true
 
 node_types:
+
   cloudify.nodes.nsx-t.Segment:
     derived_from: cloudify.nodes.Network
     properties:
@@ -620,7 +644,24 @@ node_types:
         delete:
           implementation: nsx-t.nsx_t_plugin.tier1.tier1.delete
 
+  cloudify.nodes.nsx-t.inventory.VirtualMachine:
+    derived_from: cloudify.nodes.Root
+    properties:
+      <<: *client_config
+      resource_config:
+        type: cloudify.types.nsx-t.inventory.VirtualMachine
+        required: false
+        description: A dictionary in order to fetch nsx-t networks attached to specific VM
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        create:
+          implementation: nsx-t.nsx_t_plugin.virtual_machine.virtual_machine.create
+        configure:
+          implementation: nsx-t.nsx_t_plugin.virtual_machine.virtual_machine.configure
 
 relationships:
   cloudify.relationships.nsx-t.segment_connected_to_dhcp_server_config:
+    derived_from: cloudify.relationships.connected_to
+
+  cloudify.relationships.nsx-t.inventory_connected_to_server:
     derived_from: cloudify.relationships.connected_to

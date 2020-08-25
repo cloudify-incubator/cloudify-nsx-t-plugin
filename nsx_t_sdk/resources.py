@@ -13,7 +13,12 @@
 #    * See the License for the specific language governing permissions and
 #    * limitations under the License.
 
-from nsx_t_sdk.common import NSXTResource
+from nsx_t_sdk.common import (
+    NSXTResource,
+    ACTION_GET,
+    ACTION_LIST
+)
+from nsx_t_sdk.exceptions import NSXTSDKException
 
 
 class State(NSXTResource):
@@ -67,3 +72,77 @@ class Tier1state(State):
     client_type = 'tier_1'
     resource_type = 'Tier1State'
     state_attr = 'tier1_state'
+
+
+class VirtualMachine(NSXTResource):
+    client_type = 'fabric'
+    resource_type = 'VirtualMachine'
+    service_name = 'VirtualMachines'
+
+    allow_create = False
+    allow_delete = True
+    allow_get = True
+    allow_list = True
+    allow_update = False
+    allow_patch = False
+
+    def get(self):
+        self._validate_allowed_method(self.allow_get, ACTION_GET)
+        display_name = self.resource_config.get('vm_name')
+        external_id = self.resource_config.get('vm_id')
+        if not any([display_name, external_id]):
+            raise NSXTSDKException(
+                'At least one virtual machine field '
+                '`vm_name or vm_id` must '
+                'be provided to lookup the vm resource'
+            )
+        results = self.list(
+            filters={
+                'display_name': display_name, 'external_id': external_id
+            },
+        ).to_dict()
+        results = results['results'] if results.get('results') else []
+        error_message = ''
+        if not results:
+            error_message = 'No virtual machine {0} found'.format(
+                display_name or external_id
+            )
+        elif len(results) > 1:
+            error_message = 'More than one virtual machine {0} found'.format(
+                display_name or external_id
+            )
+
+        if error_message:
+            raise NSXTSDKException(error_message)
+
+        self.resource_id = results[0]['external_id']
+        return results[0]
+
+
+class VirtualNetworkInterface(NSXTResource):
+    client_type = 'fabric'
+    resource_type = 'VirtualNetworkInterface'
+    service_name = 'Vifs'
+
+    allow_create = False
+    allow_delete = True
+    allow_get = False
+    allow_list = True
+    allow_update = False
+    allow_patch = False
+
+    def list(self,
+             cursor=None,
+             included_fields=None,
+             page_size=None,
+             sort_ascending=None,
+             sort_by=None,
+             filters=None
+             ):
+        self._validate_allowed_method(self.allow_get, ACTION_LIST)
+        owner_vm_id = self.resource_config.get('owner_vm_id')
+        if not owner_vm_id:
+            raise NSXTSDKException('Owner VM ID is missing')
+
+        results = super(VirtualNetworkInterface, self).list(filters=filters)
+        return results
