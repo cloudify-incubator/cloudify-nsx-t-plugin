@@ -27,7 +27,7 @@ def _update_tier_1_gateway(client_config, tier1_gateway_id, dhcp_server_paths):
         },
         logger=ctx.logger
     )
-    tier1_object = tier1.get()
+    tier1_object = tier1.get(to_dict=False)
     tier1_object.dhcp_config_paths = dhcp_server_paths
     tier1.update(tier1_object)
 

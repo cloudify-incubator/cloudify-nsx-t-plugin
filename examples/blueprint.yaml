@@ -127,7 +127,7 @@ node_templates:
 
 outputs:
   target_network:
-    value: { get_attribute: [ virtual_machine_inventory, { get_attribute: [ segment, name ] ] }
+    value: { get_attribute: [ virtual_machine_inventory, { get_attribute: [ segment, name ] } ] }
 
   networks:
     value: { get_attribute: [ virtual_machine_inventory, networks ] }

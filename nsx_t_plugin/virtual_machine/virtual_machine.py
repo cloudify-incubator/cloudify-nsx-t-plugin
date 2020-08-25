@@ -19,7 +19,11 @@ from cloudify import ctx
 from cloudify.exceptions import NonRecoverableError
 
 from nsx_t_plugin.decorators import with_nsx_t_client
-from nsx_t_sdk.resources import VirtualMachine, VirtualNetworkInterface
+from nsx_t_sdk.resources import (
+     VirtualMachine,
+     VirtualNetworkInterface,
+     SegmentPort
+)
 
 
 def _update_network_with_ipv4_and_ipv6(network):
@@ -38,26 +42,56 @@ def _update_network_with_ipv4_and_ipv6(network):
     network['ipv6_addresses'] = ipv_6
 
 
+def _lookup_segment_ports(client_config, network_name):
+    segment_port = SegmentPort(
+        client_config=client_config,
+        logger=ctx.logger,
+        resource_config={}
+    )
+    ports = []
+    for nsx_t_port in segment_port.list(
+            filters={
+                'segment_id': network_name
+            }
+    ):
+        if nsx_t_port.get('attachment'):
+            ports.append(nsx_t_port['attachment']['id'])
+
+    return ports
+
+
+def _get_target_network(ports, network):
+    if not network.get('lport_attachment_id'):
+        return {}
+    return network if network['lport_attachment_id'] in ports else {}
+
+
 def _populate_networks_for_virtual_machine(
+        client_config,
         owner_vm_id,
         network_name,
         networks
 ):
+    ports = _lookup_segment_ports(client_config, network_name)
+    if not ports:
+        raise NonRecoverableError('Network {0} is not connected to any device')
     networks_obj = {}
     networks_obj['networks'] = {}
+    target_network = {}
     for network in networks:
         _update_network_with_ipv4_and_ipv6(network)
+        if not target_network:
+            target_network = _get_target_network(ports, network)
         networks_obj['networks'][network['display_name']] = network
 
-    if networks_obj['networks'].get(network_name):
-        ctx.instance.runtime_properties[network_name] = networks_obj[
-            'networks'][network_name]
-    else:
+    if not target_network:
         raise NonRecoverableError(
             'The selected network {0} is not '
             'attached to target virtual machine {1}'
             ''.format(network_name, owner_vm_id)
         )
+
+    ctx.instance.runtime_properties[network_name] = target_network
     ctx.instance.runtime_properties['networks'] = networks_obj
 
 
@@ -93,4 +127,9 @@ def configure(nsx_t_resource):
             'Virtual Machine is not attached to any '
             'network'
         )
-    _populate_networks_for_virtual_machine(owner_vm_id, network_name, networks)
+    _populate_networks_for_virtual_machine(
+        client_config,
+        owner_vm_id,
+        network_name,
+        networks
+    )

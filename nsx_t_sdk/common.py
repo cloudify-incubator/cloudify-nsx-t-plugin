@@ -216,9 +216,11 @@ class NSXTResource(object):
 
         return self._invoke(ACTION_DELETE, params)
 
-    def get(self):
+    def get(self, to_dict=True):
         self._validate_allowed_method(self.allow_get, ACTION_GET)
-        return self._invoke(ACTION_GET, (self.resource_id,)).to_dict()
+        if to_dict:
+            return self._invoke(ACTION_GET, (self.resource_id,)).to_dict()
+        return self._invoke(ACTION_GET, (self.resource_id,))
 
     def list(self,
              cursor=None,

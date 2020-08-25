@@ -174,8 +174,9 @@ def validate_if_resource_started(
     :param ready_states: List of ready states to say that resource is ready
     """
     resource_state = nsx_t_state.get()
-    state = getattr(resource_state, nsx_t_state.state_attr, 'state')
-    state = state.state if hasattr(state, 'state') else state
+    state = resource_state[nsx_t_state.state_attr]
+    if isinstance(state, dict):
+        state = state['state']
     if state in pending_states:
         raise OperationRetry(
             '{0} state '
