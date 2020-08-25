@@ -33,6 +33,7 @@ setup(
         'vapi-runtime==2.14.0',
         'nsx-global-policy-python-sdk==3.0.0.0.0.15946039',
         'nsx-policy-python-sdk==3.0.0.0.0.15946039',
-        'nsx-python-sdk==3.0.0.0.0.15946039'
+        'nsx-python-sdk==3.0.0.0.0.15946039',
+        'IPy==0.81'
     ]
 )

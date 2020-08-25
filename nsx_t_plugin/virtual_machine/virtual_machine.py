@@ -13,11 +13,52 @@
 #    * See the License for the specific language governing permissions and
 #    * limitations under the License.
 
+from IPy import IP
+
 from cloudify import ctx
 from cloudify.exceptions import NonRecoverableError
 
 from nsx_t_plugin.decorators import with_nsx_t_client
 from nsx_t_sdk.resources import VirtualMachine, VirtualNetworkInterface
+
+
+def _update_network_with_ipv4_and_ipv6(network):
+    ipv_4 = []
+    ipv_6 = []
+    ip_address_info = network.get('ip_address_info', []) or []
+    for ip_address_obj in ip_address_info:
+        ip_addresses = ip_address_obj.get('ip_addresses', []) or []
+        for ip_address in ip_addresses:
+            if IP(ip_address).version() == 4:
+                ipv_4.append(ip_address)
+            elif IP(ip_address).version() == 6:
+                ipv_6.append(ip_address)
+
+    network['ipv4_addresses'] = ipv_4
+    network['ipv6_addresses'] = ipv_6
+
+
+def _populate_networks_for_virtual_machine(
+        owner_vm_id,
+        network_name,
+        networks
+):
+    networks_obj = {}
+    networks_obj['networks'] = {}
+    for network in networks:
+        _update_network_with_ipv4_and_ipv6(network)
+        networks_obj['networks'][network['display_name']] = network
+
+    if networks_obj['networks'].get(network_name):
+        ctx.instance.runtime_properties[network_name] = networks_obj[
+            'networks'][network_name]
+    else:
+        raise NonRecoverableError(
+            'The selected network {0} is not '
+            'attached to target virtual machine {1}'
+            ''.format(network_name, owner_vm_id)
+        )
+    ctx.instance.runtime_properties['networks'] = networks_obj
 
 
 @with_nsx_t_client(VirtualMachine)
@@ -52,18 +93,4 @@ def configure(nsx_t_resource):
             'Virtual Machine is not attached to any '
             'network'
         )
-    networks_obj = {}
-    networks_obj['networks'] = {}
-    for network in networks:
-        networks_obj['networks'][network['display_name']] = network
-
-    if networks_obj['networks'].get(network_name):
-        ctx.instance.runtime_properties[network_name] = networks_obj[
-            'networks'][network_name]
-    else:
-        raise NonRecoverableError(
-            'The selected network {0} is not '
-            'attached to target virtual machine {1}'
-            ''.format(network_name, owner_vm_id)
-        )
-    ctx.instance.runtime_properties['networks'] = networks_obj
+    _populate_networks_for_virtual_machine(owner_vm_id, network_name, networks)

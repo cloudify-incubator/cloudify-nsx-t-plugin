@@ -100,8 +100,7 @@ class VirtualMachine(NSXTResource):
             filters={
                 'display_name': display_name, 'external_id': external_id
             },
-        ).to_dict()
-        results = results['results'] if results.get('results') else []
+        )
         error_message = ''
         if not results:
             error_message = 'No virtual machine {0} found'.format(
@@ -139,10 +138,6 @@ class VirtualNetworkInterface(NSXTResource):
              sort_by=None,
              filters=None
              ):
-        self._validate_allowed_method(self.allow_get, ACTION_LIST)
-        owner_vm_id = self.resource_config.get('owner_vm_id')
-        if not owner_vm_id:
-            raise NSXTSDKException('Owner VM ID is missing')
-
+        self._validate_allowed_method(self.allow_list, ACTION_LIST)
         results = super(VirtualNetworkInterface, self).list(filters=filters)
         return results
