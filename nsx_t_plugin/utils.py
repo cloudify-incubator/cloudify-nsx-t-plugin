@@ -107,7 +107,7 @@ def populate_nsx_t_instance_from_ctx(class_decl, _ctx, kwargs):
 
     resource = class_decl(client_config=client_config,
                           resource_config=resource_config,
-                          logger=_ctx.logger)
+                          logger=ctx.logger)
 
     return resource
 

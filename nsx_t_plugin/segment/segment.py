@@ -117,7 +117,7 @@ def add_static_bindings(nsx_t_resource, network_unique_id, ip_address):
         network_unique_id, ip_address
     )
     for network in networks:
-        if network.get('name') == 'network_unique_id':
+        if network.get('name') == network_unique_id:
             mac_address = network.get('mac')
             break
     else:
@@ -140,4 +140,5 @@ def add_static_bindings(nsx_t_resource, network_unique_id, ip_address):
         }
     ]
     segment = nsx_t_resource.update(segment)
-    ctx.target.instance.runtime_properties['resource_config'] = segment.to_dict
+    ctx.target.instance.runtime_properties['resource_config'] = \
+        segment.to_dict()
