@@ -16,8 +16,7 @@
 from nsx_t_sdk.common import (
     NSXTResource,
     ACTION_GET,
-    ACTION_LIST,
-    ACTION_UPDATE
+    ACTION_LIST
 )
 from nsx_t_sdk.exceptions import NSXTSDKException
 
