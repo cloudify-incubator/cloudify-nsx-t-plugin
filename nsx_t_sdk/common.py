@@ -193,28 +193,23 @@ class NSXTResource(object):
     def create(self):
         return self.update(self.resource_config)
 
-    def update(self, new_config=None):
+    def update(self, *args):
         self._validate_allowed_method(self.allow_update, ACTION_UPDATE)
         return self._invoke(
             ACTION_UPDATE,
-            (self.resource_id, new_config,),
+            args,
         )
 
-    def patch(self, new_config=None):
+    def patch(self, *args):
         self._validate_allowed_method(self.allow_patch, ACTION_PATCH)
         return self._invoke(
             ACTION_PATCH,
-            (self.resource_id, new_config,),
+            args,
         )
 
-    def delete(self, extra_params=None):
-        extra_params = extra_params or ()
+    def delete(self, *args):
         self._validate_allowed_method(self.allow_delete, ACTION_DELETE)
-        params = (self.resource_id,)
-        if extra_params:
-            params += extra_params
-
-        return self._invoke(ACTION_DELETE, params)
+        return self._invoke(ACTION_DELETE, args)
 
     def get(self, to_dict=True):
         self._validate_allowed_method(self.allow_get, ACTION_GET)
@@ -228,7 +223,8 @@ class NSXTResource(object):
              page_size=None,
              sort_ascending=None,
              sort_by=None,
-             filters=None):
+             filters=None,
+             to_dict=True):
         self._validate_allowed_method(self.allow_list, ACTION_LIST)
         params = {
             'cursor': cursor,
@@ -239,5 +235,7 @@ class NSXTResource(object):
         }
         if filters:
             params.update(filters)
-        results = self._invoke(ACTION_LIST, kwargs=params).to_dict()
-        return results['results'] if results.get('results') else []
+        if to_dict:
+            results = self._invoke(ACTION_LIST, kwargs=params).to_dict()
+            return results['results'] if results.get('results') else []
+        return self._invoke(ACTION_LIST, kwargs=params)

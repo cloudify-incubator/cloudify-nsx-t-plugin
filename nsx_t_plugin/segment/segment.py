@@ -29,7 +29,9 @@ from nsx_t_plugin.utils import (
 from nsx_t_sdk.resources import (
     Segment,
     SegmentState,
-    SegmentPort
+    SegmentPort,
+    DhcpV4StaticBindingConfig,
+    DhcpV6StaticBindingConfig
 )
 
 
@@ -43,16 +45,21 @@ def _update_subnet_configuration(resource_config):
                 resource_config['subnets'].append(ip_option_config)
 
 
-def _get_networks_info_from_inputs(network_unique_id, ip_address):
+def _get_networks_info_from_inputs(
+        network_unique_id,
+        ip_v4_address,
+        ip_v6_address
+):
     if not network_unique_id:
         network_unique_id = ctx.target.instance.runtime_properties.get(
             'unique_id'
         )
-    if not ip_address:
+    if not any([ip_v4_address, ip_v6_address]):
         raise NonRecoverableError(
-            '`ip_address` is a required input and must be provided'
+            '`ip_v4_address` & `ip_v6_address` cannot be both unset, '
+            'select at least on of them'
         )
-    server_networks = ctx.source.instance.runtime_properties.get('networks')
+    server_networks = ctx.source.inst_ance.runtime_properties.get('networks')
     server_id = ctx.source.instance.runtime_properties.get('id')
     if not server_id:
         server_id = ctx.source.instance.id
@@ -61,6 +68,71 @@ def _get_networks_info_from_inputs(network_unique_id, ip_address):
             '`networks` runtime property is either not set or empty for '
             'server {0}'.format(server_id))
     return network_unique_id, server_networks
+
+
+def _prepare_dhcp_static_binding_configs(
+        segment_id,
+        mac_address,
+        ipv4_address,
+        ip_v6_address
+):
+    dhcp_v4_config = {}
+    dhcp_v6_config = {}
+
+    if ipv4_address:
+        dhcp_v4_config['id'] = '{segment}-{dhcp}'.format(
+            segment=segment_id, dhcp='dhcpv4'
+        )
+        dhcp_v4_config['ip_address'] = ipv4_address
+        dhcp_v4_config['mac_address'] = mac_address
+
+    if ip_v6_address:
+        dhcp_v6_config['id'] = '{segment}-{dhcp}'.format(
+            segment=segment_id, dhcp='dhcpv6'
+        )
+        dhcp_v6_config['ip_addresses'] = [ip_v6_address]
+        dhcp_v6_config['mac_address'] = mac_address
+
+    return dhcp_v4_config, dhcp_v6_config
+
+
+def _create_dhcp_static_binding_configs(
+        segment_id,
+        client_config,
+        dhcp_v4_config,
+        dhcp_v6_config
+):
+    if dhcp_v4_config:
+        dhcp_v4_binding = DhcpV4StaticBindingConfig(
+            client_config=client_config,
+            logger=ctx.logger,
+            resource_config=dhcp_v4_config)
+        dhcp_v4_static_binding_id = dhcp_v4_config.pop('id')
+        dhcp_v4_binding_response = dhcp_v4_binding.update(
+            segment_id,
+            dhcp_v4_static_binding_id,
+            dhcp_v4_config
+        )
+        ctx.target.instance.runtime_properties['dhcp_v4_static_binding_id'] = \
+            dhcp_v4_static_binding_id
+        ctx.target.instance.runtime_properties['dhcp_v4_static_binding'] = \
+            dhcp_v4_binding_response
+
+    if dhcp_v6_config:
+        dhcp_v6_binding = DhcpV6StaticBindingConfig(
+            client_config=client_config,
+            logger=ctx.logger,
+            resource_config=dhcp_v6_config)
+        dhcp_v6_static_binding_id = dhcp_v6_config.pop('id')
+        dhcp_v6_binding_response = dhcp_v6_binding.update(
+            segment_id,
+            dhcp_v6_static_binding_id,
+            dhcp_v6_config
+        )
+        ctx.target.instance.runtime_properties['dhcp_v6_static_binding_id'] = \
+            dhcp_v6_static_binding_id
+        ctx.target.instance.runtime_properties['dhcp_v6_static_binding'] = \
+            dhcp_v6_binding_response
 
 
 @with_nsx_t_client(Segment)
@@ -103,7 +175,7 @@ def stop(nsx_t_resource):
             logger=ctx.logger,
             resource_config={'id': nsx_t_port['id']}
         )
-        port.delete((nsx_t_resource.resource_id,))
+        port.delete(nsx_t_resource.resource_id, nsx_t_port['id'])
 
 
 @with_nsx_t_client(Segment)
@@ -112,9 +184,14 @@ def delete(nsx_t_resource):
 
 
 @with_nsx_t_client(Segment)
-def add_static_bindings(nsx_t_resource, network_unique_id, ip_address):
+def add_static_bindings(
+        nsx_t_resource,
+        network_unique_id,
+        ip_v4_address,
+        ip_v6_address
+):
     network_unique_id, networks = _get_networks_info_from_inputs(
-        network_unique_id, ip_address
+        network_unique_id, ip_v4_address, ip_v6_address
     )
     for network in networks:
         if network.get('name') == network_unique_id:
@@ -125,20 +202,51 @@ def add_static_bindings(nsx_t_resource, network_unique_id, ip_address):
             'Network {0} is not attached to server. Select a valid '
             'network'.format(network_unique_id)
         )
-
     if not mac_address:
         raise NonRecoverableError(
             'Mac address cannot be empty '
             'for network {0}'.format(network_unique_id)
         )
+    dhcp_v4_config, dhcp_v6_config = _prepare_dhcp_static_binding_configs(
+        nsx_t_resource.id,
+        mac_address,
+        ip_v4_address,
+        ip_v6_address
+    )
+    _create_dhcp_static_binding_configs(
+        nsx_t_resource.id,
+        nsx_t_resource.client_config,
+        dhcp_v4_config,
+        dhcp_v6_config
+    )
 
-    segment = nsx_t_resource.get(to_dict=False)
-    segment.address_bindings = [
-        {
-            'ip_address': ip_address,
-            'mac_address': mac_address
-        }
-    ]
-    segment = nsx_t_resource.update(segment)
-    ctx.target.instance.runtime_properties['resource_config'] = \
-        segment.to_dict()
+
+@with_nsx_t_client(Segment)
+def remove_static_bindings(nsx_t_resource):
+    dhcp_v4_static_binding_id = ctx.target.instance.runtime_properties.get(
+        'dhcp_v4_static_binding_id'
+    )
+    dhcp_v6_static_binding_id = ctx.target.instance.runtime_properties.get(
+        'dhcp_v6_static_binding_id'
+    )
+    if not any([dhcp_v4_static_binding_id, dhcp_v6_static_binding_id]):
+        raise NonRecoverableError(
+            'DHCP Static binding ids are not set for '
+            'ipv4 & ipv6, at least one must be set as '
+            'runtime property'
+        )
+    if dhcp_v4_static_binding_id:
+        dhcp_v4_binding = DhcpV4StaticBindingConfig(
+            client_config=nsx_t_resource.client_config,
+            resource_config={'id': dhcp_v4_static_binding_id},
+            logger=ctx.logger
+        )
+        dhcp_v4_binding.delete(nsx_t_resource.id, dhcp_v4_static_binding_id)
+
+    if dhcp_v6_static_binding_id:
+        dhcp_v6_binding = DhcpV6StaticBindingConfig(
+            client_config=nsx_t_resource.client_config,
+            resource_config={'id': dhcp_v6_static_binding_id},
+            logger=ctx.logger
+        )
+        dhcp_v6_binding.delete(nsx_t_resource.id, dhcp_v6_static_binding_id)

@@ -16,7 +16,8 @@
 from nsx_t_sdk.common import (
     NSXTResource,
     ACTION_GET,
-    ACTION_LIST
+    ACTION_LIST,
+    ACTION_UPDATE
 )
 from nsx_t_sdk.exceptions import NSXTSDKException
 
@@ -56,6 +57,19 @@ class SegmentState(State):
     resource_type = 'SegmentState'
 
 
+class DhcpStaticBindingConfigs(NSXTResource):
+    client_type = 'segment'
+    service_name = 'DhcpStaticBindingConfigs'
+
+
+class DhcpV4StaticBindingConfig(DhcpStaticBindingConfigs):
+    resource_type = 'DhcpV4StaticBindingConfig'
+
+
+class DhcpV6StaticBindingConfig(DhcpStaticBindingConfigs):
+    resource_type = 'DhcpV6StaticBindingConfig'
+
+
 class DhcpServerConfig(NSXTResource):
     client_type = 'nsx_infra'
     resource_type = 'DhcpServerConfig'
@@ -86,7 +100,7 @@ class VirtualMachine(NSXTResource):
     allow_update = False
     allow_patch = False
 
-    def get(self):
+    def get(self, to_dict=True):
         self._validate_allowed_method(self.allow_get, ACTION_GET)
         display_name = self.resource_config.get('vm_name')
         external_id = self.resource_config.get('vm_id')

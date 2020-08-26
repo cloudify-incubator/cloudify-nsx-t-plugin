@@ -676,6 +676,11 @@ relationships:
             network_unique_id:
               type: string
               required: false
-            ip_address:
+            ip_v4_address:
               type: string
-              required: true
+              required: false
+            ip_v6_address:
+              type: string
+              required: false
+        unlink:
+          implementation: nsx-t.nsx_t_plugin.segment.segment.remove_static_bindings
