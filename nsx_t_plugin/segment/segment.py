@@ -72,6 +72,9 @@ def create(nsx_t_resource):
     # Update the resource_id with the new "id" returned from API
     nsx_t_resource.resource_id = resource.id
 
+    # Set the unique_id to use it later on
+    ctx.instance.runtime_properties['unique_id'] = resource.unique_id
+
 
 @with_nsx_t_client(SegmentState)
 def start(nsx_t_resource):
