@@ -59,7 +59,7 @@ def _get_networks_info_from_inputs(
             '`ip_v4_address` & `ip_v6_address` cannot be both unset, '
             'select at least on of them'
         )
-    server_networks = ctx.source.inst_ance.runtime_properties.get('networks')
+    server_networks = ctx.source.instance.runtime_properties.get('networks')
     server_id = ctx.source.instance.runtime_properties.get('id')
     if not server_id:
         server_id = ctx.source.instance.id
@@ -206,13 +206,13 @@ def add_static_bindings(
             'for network {0}'.format(network_unique_id)
         )
     dhcp_v4_config, dhcp_v6_config = _prepare_dhcp_static_binding_configs(
-        nsx_t_resource.id,
+        nsx_t_resource.resource_id,
         mac_address,
         ip_v4_address,
         ip_v6_address
     )
     _create_dhcp_static_binding_configs(
-        nsx_t_resource.id,
+        nsx_t_resource.resource_id,
         nsx_t_resource.client_config,
         dhcp_v4_config,
         dhcp_v6_config

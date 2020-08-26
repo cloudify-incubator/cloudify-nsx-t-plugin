@@ -85,4 +85,4 @@ def stop(nsx_t_resource):
 
 @with_nsx_t_client(DhcpServerConfig)
 def delete(nsx_t_resource):
-    nsx_t_resource.delete()
+    nsx_t_resource.delete(nsx_t_resource.resource_id)

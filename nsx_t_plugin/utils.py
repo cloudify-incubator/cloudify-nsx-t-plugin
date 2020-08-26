@@ -211,7 +211,7 @@ def validate_if_resource_deleted(nsx_t_resource):
         return
 
     try:
-        nsx_t_resource.delete(nsx_t_resource.id)
+        nsx_t_resource.delete(nsx_t_resource.resource_id)
     except NSXTSDKException:
         raise OperationRetry(
             message='{0} {1} deletion is in progress.'.format(

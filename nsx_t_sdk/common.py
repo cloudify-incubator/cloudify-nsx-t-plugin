@@ -191,7 +191,7 @@ class NSXTResource(object):
             )
 
     def create(self):
-        return self.update(self.resource_config)
+        return self.update(self.resource_id, self.resource_config)
 
     def update(self, *args):
         self._validate_allowed_method(self.allow_update, ACTION_UPDATE)
