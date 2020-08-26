@@ -74,7 +74,8 @@ def _populate_networks_for_virtual_machine(
 ):
     ports = _lookup_segment_ports(client_config, network_id)
     if not ports:
-        raise NonRecoverableError('Network {0} is not connected to any device')
+        raise NonRecoverableError(
+            'Network {0} is not connected to any device'.format(network_id))
     networks_obj = {}
     networks_obj['networks'] = {}
     target_network = {}

@@ -14,6 +14,7 @@
 #    * limitations under the License.
 
 from cloudify import ctx
+from cloudify.exceptions import NonRecoverableError
 
 from nsx_t_plugin.decorators import with_nsx_t_client
 from nsx_t_plugin.constants import (
@@ -40,6 +41,26 @@ def _update_subnet_configuration(resource_config):
             ip_option_config = subnet.get(ip_option)
             if ip_option_config:
                 resource_config['subnets'].append(ip_option_config)
+
+
+def _get_networks_info_from_inputs(network_unique_id, ip_address):
+    if not network_unique_id:
+        network_unique_id = ctx.target.instance.runtime_properties.get(
+            'unique_id'
+        )
+    if not ip_address:
+        raise NonRecoverableError(
+            '`ip_address` is a required input and must be provided'
+        )
+    server_networks = ctx.source.instance.runtime_properties.get('networks')
+    server_id = ctx.source.instance.runtime_properties.get('id')
+    if not server_id:
+        server_id = ctx.source.instance.id
+    if not server_networks:
+        raise NonRecoverableError(
+            '`networks` runtime property is either not set or empty for '
+            'server {0}'.format(server_id))
+    return network_unique_id, server_networks
 
 
 @with_nsx_t_client(Segment)
@@ -85,3 +106,35 @@ def stop(nsx_t_resource):
 @with_nsx_t_client(Segment)
 def delete(nsx_t_resource):
     validate_if_resource_deleted(nsx_t_resource)
+
+
+@with_nsx_t_client(Segment)
+def add_static_bindings(nsx_t_resource, network_unique_id, ip_address):
+    network_unique_id, networks = _get_networks_info_from_inputs(
+        network_unique_id, ip_address
+    )
+    for network in networks:
+        if network.get('name') == 'network_unique_id':
+            mac_address = network.get('mac')
+            break
+    else:
+        raise NonRecoverableError(
+            'Network {0} is not attached to server. Select a valid '
+            'network'.format(network_unique_id)
+        )
+
+    if not mac_address:
+        raise NonRecoverableError(
+            'Mac address cannot be empty '
+            'for network {0}'.format(network_unique_id)
+        )
+
+    segment = nsx_t_resource.get(to_dict=False)
+    segment.address_bindings = [
+        {
+            'ip_address': ip_address,
+            'mac_address': mac_address
+        }
+    ]
+    segment = nsx_t_resource.update(segment)
+    ctx.target.instance.runtime_properties['resource_config'] = segment.to_dict

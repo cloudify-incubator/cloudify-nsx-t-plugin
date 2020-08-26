@@ -665,3 +665,17 @@ relationships:
 
   cloudify.relationships.nsx-t.inventory_connected_to_server:
     derived_from: cloudify.relationships.connected_to
+
+  cloudify.relationships.server_connected_to_segment:
+    derived_from: cloudify.relationships.connected_to
+    target_interfaces:
+      cloudify.interfaces.relationship_lifecycle:
+        preconfigure:
+          implementation: nsx-t.nsx_t_plugin.segment.segment.add_static_bindings
+          inputs:
+            network_unique_id:
+              type: string
+              required: false
+            ip_address:
+              type: string
+              required: true
