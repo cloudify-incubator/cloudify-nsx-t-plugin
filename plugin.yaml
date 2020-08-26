@@ -674,13 +674,10 @@ relationships:
           implementation: nsx-t.nsx_t_plugin.segment.segment.add_static_bindings
           inputs:
             network_unique_id:
-              type: string
-              required: false
+              default: { get_attribute: [ TARGET, unique_id ] }
             ip_v4_address:
-              type: string
-              required: false
+              default: ''
             ip_v6_address:
-              type: string
-              required: false
+              default: ''
         unlink:
           implementation: nsx-t.nsx_t_plugin.segment.segment.remove_static_bindings

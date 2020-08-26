@@ -107,14 +107,13 @@ def _create_dhcp_static_binding_configs(
             client_config=client_config,
             logger=ctx.logger,
             resource_config=dhcp_v4_config)
-        dhcp_v4_static_binding_id = dhcp_v4_config.pop('id')
         dhcp_v4_binding_response = dhcp_v4_binding.update(
             segment_id,
-            dhcp_v4_static_binding_id,
+            dhcp_v4_binding.resource_id,
             dhcp_v4_config
         )
         ctx.target.instance.runtime_properties['dhcp_v4_static_binding_id'] = \
-            dhcp_v4_static_binding_id
+            dhcp_v4_binding.resource_id
         ctx.target.instance.runtime_properties['dhcp_v4_static_binding'] = \
             dhcp_v4_binding_response
 
@@ -123,14 +122,13 @@ def _create_dhcp_static_binding_configs(
             client_config=client_config,
             logger=ctx.logger,
             resource_config=dhcp_v6_config)
-        dhcp_v6_static_binding_id = dhcp_v6_config.pop('id')
         dhcp_v6_binding_response = dhcp_v6_binding.update(
             segment_id,
-            dhcp_v6_static_binding_id,
+            dhcp_v6_binding.resource_id,
             dhcp_v6_config
         )
         ctx.target.instance.runtime_properties['dhcp_v6_static_binding_id'] = \
-            dhcp_v6_static_binding_id
+            dhcp_v6_binding.resource_id
         ctx.target.instance.runtime_properties['dhcp_v6_static_binding'] = \
             dhcp_v6_binding_response
 
