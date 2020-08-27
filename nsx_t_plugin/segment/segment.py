@@ -108,13 +108,13 @@ def _handle_dhcp_static_bindings(
             client_config=client_config,
             logger=ctx.logger,
             resource_config=dhcp_config)
-        if not tasks.get(dhcp_config['id']):
+        if not tasks.get(dhcp_binding.resource_id):
             dhcp_binding_response = dhcp_binding.update(
                 segment_id,
                 dhcp_binding.resource_id,
                 dhcp_config
             )
-            tasks[dhcp_config['id']] = True
+            tasks[dhcp_binding.resource_id] = True
             ctx.target.instance.runtime_properties[
                 'dhcp_{0}_static_binding_id'.format(dhcp_type)] = \
                 dhcp_binding.resource_id
@@ -188,10 +188,18 @@ def _wait_on_dhcp_static_bindings(segment_id, client_config):
     ):
         bindings_v6.append(dhcp_v6_binding['id'])
 
-    if any([bindings_v4, bindings_v6]):
-        raise OperationRetry(
-            'There are still some DHCP static binding not removed yet'
-        )
+    if not any([bindings_v4, bindings_v6]):
+        ctx.logger.info('All DHCP Static Binding objects are deleted')
+    else:
+        for binding_v4_id in bindings_v4:
+            validate_if_resource_deleted(
+                dhcp_v4_binding, (segment_id, binding_v4_id,)
+            )
+
+        for binding_v6_id in bindings_v6:
+            validate_if_resource_deleted(
+                dhcp_v6_binding, (segment_id, binding_v6_id,)
+            )
 
 
 @with_nsx_t_client(Segment)
