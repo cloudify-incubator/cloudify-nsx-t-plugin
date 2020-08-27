@@ -29,7 +29,7 @@ def _update_tier_1_gateway(client_config, tier1_gateway_id, dhcp_server_paths):
     )
     tier1_object = tier1.get(to_dict=False)
     tier1_object.dhcp_config_paths = dhcp_server_paths
-    tier1.update(tier1_object)
+    tier1.update(tier1_gateway_id, tier1_object)
 
 
 def _link_dhcp_server_to_tier_1(client_config, tier1_gateway_id):
@@ -85,4 +85,4 @@ def stop(nsx_t_resource):
 
 @with_nsx_t_client(DhcpServerConfig)
 def delete(nsx_t_resource):
-    nsx_t_resource.delete()
+    nsx_t_resource.delete(nsx_t_resource.resource_id)

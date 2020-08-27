@@ -24,6 +24,7 @@ from nsx_t_sdk.exceptions import NSXTSDKException
 class State(NSXTResource):
     service_name = 'State'
     state_attr = 'state'
+
     allow_create = False
     allow_delete = False
     allow_get = True
@@ -56,6 +57,24 @@ class SegmentState(State):
     resource_type = 'SegmentState'
 
 
+class DhcpStaticBindingConfigs(NSXTResource):
+    client_type = 'segment'
+    service_name = 'DhcpStaticBindingConfigs'
+
+
+class DhcpStaticBindingState(State):
+    client_type = 'dhcp_static_bindings'
+    resource_type = 'DhcpStaticBindingState'
+
+
+class DhcpV4StaticBindingConfig(DhcpStaticBindingConfigs):
+    resource_type = 'DhcpV4StaticBindingConfig'
+
+
+class DhcpV6StaticBindingConfig(DhcpStaticBindingConfigs):
+    resource_type = 'DhcpV6StaticBindingConfig'
+
+
 class DhcpServerConfig(NSXTResource):
     client_type = 'nsx_infra'
     resource_type = 'DhcpServerConfig'
@@ -86,7 +105,7 @@ class VirtualMachine(NSXTResource):
     allow_update = False
     allow_patch = False
 
-    def get(self):
+    def get(self, args=None, to_dict=True):
         self._validate_allowed_method(self.allow_get, ACTION_GET)
         display_name = self.resource_config.get('vm_name')
         external_id = self.resource_config.get('vm_id')
@@ -100,6 +119,7 @@ class VirtualMachine(NSXTResource):
             filters={
                 'display_name': display_name, 'external_id': external_id
             },
+            to_dict=to_dict
         )
         error_message = ''
         if not results:
@@ -136,8 +156,17 @@ class VirtualNetworkInterface(NSXTResource):
              page_size=None,
              sort_ascending=None,
              sort_by=None,
-             filters=None
+             filters=None,
+             to_dict=True
              ):
         self._validate_allowed_method(self.allow_list, ACTION_LIST)
-        results = super(VirtualNetworkInterface, self).list(filters=filters)
+        results = super(VirtualNetworkInterface, self).list(
+            cursor=cursor,
+            included_fields=included_fields,
+            page_size=page_size,
+            sort_ascending=sort_ascending,
+            sort_by=sort_by,
+            filters=filters,
+            to_dict=to_dict
+        )
         return results

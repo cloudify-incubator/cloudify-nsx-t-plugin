@@ -49,6 +49,9 @@ inputs:
     type: string
     default: Cluster
 
+  ip_address:
+    type: string
+
 dsl_definitions:
 
   client_config: &client_config
@@ -111,8 +114,14 @@ node_templates:
             nsx_t_switch: { get_input: nsx_t_switch }
             use_dhcp: true
     relationships:
-      - type: cloudify.relationships.depends_on
+      - type: cloudify.relationships.server_connected_to_segment
         target: segment
+        target_interfaces:
+          cloudify.interfaces.relationship_lifecycle:
+            preconfigure:
+              inputs:
+                network_unique_id: { get_attribute: [ segment, unique_id ] }
+                ip_address: { get_input: ip_address }
 
   virtual_machine_inventory:
     type: cloudify.nodes.nsx-t.inventory.VirtualMachine

@@ -17,7 +17,8 @@ from cloudify import ctx
 from cloudify.exceptions import NonRecoverableError, OperationRetry
 from cloudify.constants import NODE_INSTANCE, RELATIONSHIP_INSTANCE
 
-from nsx_t_sdk.exceptions import NSXTSDKException
+from com.vmware.vapi.std.errors_client import NotFound, Error
+
 from nsx_t_plugin.constants import (
     DELETE_OPERATION,
     CREATE_OPERATION,
@@ -107,7 +108,7 @@ def populate_nsx_t_instance_from_ctx(class_decl, _ctx, kwargs):
 
     resource = class_decl(client_config=client_config,
                           resource_config=resource_config,
-                          logger=_ctx.logger)
+                          logger=ctx.logger)
 
     return resource
 
@@ -164,7 +165,8 @@ def validate_if_resource_started(
         resource_name,
         nsx_t_state,
         pending_states,
-        ready_states
+        ready_states,
+        args=None
 ):
     """
     This method will validate if the nsx_t_resource is ready to use and started
@@ -172,8 +174,9 @@ def validate_if_resource_started(
     :param nsx_t_state: Instance derived from "NSXTResource" class
     :param pending_states: List of pending state to wait for
     :param ready_states: List of ready states to say that resource is ready
+    :param args any extra args to passed to the get state api
     """
-    resource_state = nsx_t_state.get()
+    resource_state = nsx_t_state.get(args=args)
     state = resource_state[nsx_t_state.state_attr]
     if isinstance(state, dict):
         state = state['state']
@@ -194,14 +197,15 @@ def validate_if_resource_started(
         )
 
 
-def validate_if_resource_deleted(nsx_t_resource):
+def validate_if_resource_deleted(nsx_t_resource, args=None):
     """
     This method will validate if the NSXT resource get deleted or not
     :param nsx_t_resource: Instance derived from "NSXTResource" class
+    :param args extra to passed to when lookup nsxt object
     """
     try:
-        nsx_t_resource.get()
-    except NSXTSDKException:
+        nsx_t_resource.get(args=args)
+    except NotFound:
         ctx.logger.info(
             '{0} {1} is deleted successfully'.format(
                 nsx_t_resource.resource_type,
@@ -211,8 +215,8 @@ def validate_if_resource_deleted(nsx_t_resource):
         return
 
     try:
-        nsx_t_resource.delete()
-    except NSXTSDKException:
+        nsx_t_resource.delete(nsx_t_resource.resource_id)
+    except Error:
         raise OperationRetry(
             message='{0} {1} deletion is in progress.'.format(
                 nsx_t_resource.resource_type,

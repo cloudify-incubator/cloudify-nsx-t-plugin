@@ -19,16 +19,15 @@ from vmware.vapi.lib import connect
 from vmware.vapi.security import user_password
 from vmware.vapi.stdlib.client.factories import StubConfigurationFactory
 from vmware.vapi.bindings.stub import ApiClient
-from vmware.vapi.bindings.error import VapiError
 
 from com.vmware import nsx_policy_client
 from com.vmware import nsx_client
 from com.vmware.nsx_policy import infra_client
 from com.vmware.nsx import fabric_client
+from com.vmware.nsx_policy.infra.segments import dhcp_static_bindings_client
 from com.vmware.nsx_policy.infra import segments_client, tier_1s_client
 
 from nsx_t_sdk import exceptions
-from nsx_t_sdk._compat import text_type
 
 AUTH_SESSION = 'session'
 AUTH_BASIC = 'basic'
@@ -72,7 +71,8 @@ class NSXTResource(object):
             'nsx_infra': infra_client,
             'segment': segments_client,
             'tier_1': tier_1s_client,
-            'fabric': fabric_client
+            'fabric': fabric_client,
+            'dhcp_static_bindings': dhcp_static_bindings_client
         }
 
     def _get_stub_factory_for_nsx_client(self, stub_config):
@@ -164,17 +164,14 @@ class NSXTResource(object):
         self.logger.debug('HTTP Request Kwargs: {0}'.format(kwargs))
         service_client = getattr(self._api_client, self.service_name)
         service_action = getattr(service_client, action)
-        try:
-            if args and kwargs:
-                result = service_action(*args, **kwargs)
-            elif args:
-                result = service_action(*args)
-            elif kwargs:
-                result = service_action(**kwargs)
-            else:
-                result = service_action()
-        except VapiError as error:
-            raise exceptions.NSXTSDKException(text_type(error))
+        if args and kwargs:
+            result = service_action(*args, **kwargs)
+        elif args:
+            result = service_action(*args)
+        elif kwargs:
+            result = service_action(**kwargs)
+        else:
+            result = service_action()
 
         self.logger.debug(
             'API Request Result: {0} '
@@ -191,36 +188,32 @@ class NSXTResource(object):
             )
 
     def create(self):
-        return self.update(self.resource_config)
+        return self.update(self.resource_id, self.resource_config)
 
-    def update(self, new_config=None):
+    def update(self, *args):
         self._validate_allowed_method(self.allow_update, ACTION_UPDATE)
         return self._invoke(
             ACTION_UPDATE,
-            (self.resource_id, new_config,),
+            args,
         )
 
-    def patch(self, new_config=None):
+    def patch(self, *args):
         self._validate_allowed_method(self.allow_patch, ACTION_PATCH)
         return self._invoke(
             ACTION_PATCH,
-            (self.resource_id, new_config,),
+            args,
         )
 
-    def delete(self, extra_params=None):
-        extra_params = extra_params or ()
+    def delete(self, *args):
         self._validate_allowed_method(self.allow_delete, ACTION_DELETE)
-        params = (self.resource_id,)
-        if extra_params:
-            params += extra_params
+        return self._invoke(ACTION_DELETE, args)
 
-        return self._invoke(ACTION_DELETE, params)
-
-    def get(self, to_dict=True):
+    def get(self, args=None, to_dict=True):
+        args = args if args else (self.resource_id,)
         self._validate_allowed_method(self.allow_get, ACTION_GET)
         if to_dict:
-            return self._invoke(ACTION_GET, (self.resource_id,)).to_dict()
-        return self._invoke(ACTION_GET, (self.resource_id,))
+            return self._invoke(ACTION_GET, args).to_dict()
+        return self._invoke(ACTION_GET, args)
 
     def list(self,
              cursor=None,
@@ -228,7 +221,8 @@ class NSXTResource(object):
              page_size=None,
              sort_ascending=None,
              sort_by=None,
-             filters=None):
+             filters=None,
+             to_dict=True):
         self._validate_allowed_method(self.allow_list, ACTION_LIST)
         params = {
             'cursor': cursor,
@@ -239,5 +233,7 @@ class NSXTResource(object):
         }
         if filters:
             params.update(filters)
-        results = self._invoke(ACTION_LIST, kwargs=params).to_dict()
-        return results['results'] if results.get('results') else []
+        if to_dict:
+            results = self._invoke(ACTION_LIST, kwargs=params).to_dict()
+            return results['results'] if results.get('results') else []
+        return self._invoke(ACTION_LIST, kwargs=params)
