@@ -115,7 +115,7 @@ def _create_dhcp_static_binding_configs(
         ctx.target.instance.runtime_properties['dhcp_v4_static_binding_id'] = \
             dhcp_v4_binding.resource_id
         ctx.target.instance.runtime_properties['dhcp_v4_static_binding'] = \
-            dhcp_v4_binding_response
+            dhcp_v4_binding_response.to_dict()
 
     if dhcp_v6_config:
         dhcp_v6_binding = DhcpV6StaticBindingConfig(
@@ -130,7 +130,7 @@ def _create_dhcp_static_binding_configs(
         ctx.target.instance.runtime_properties['dhcp_v6_static_binding_id'] = \
             dhcp_v6_binding.resource_id
         ctx.target.instance.runtime_properties['dhcp_v6_static_binding'] = \
-            dhcp_v6_binding_response
+            dhcp_v6_binding_response.to_dict()
 
 
 @with_nsx_t_client(Segment)
