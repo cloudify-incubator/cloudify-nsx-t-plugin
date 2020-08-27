@@ -19,6 +19,10 @@ The plugin provides the following features for interacting with NSX-T API:
    - List Virtual Machines
    - List All Virtual Network Interface Associated with VM
 
+5. DHCP Static Binding
+  - Create DHCP Static Binding
+  - Delete DHCP Static Binding
+
 ## Authentication with NSX-T
 
 Each node template, has a `client_config` property which stores your account credentials.
@@ -62,6 +66,7 @@ Node instances of any of the types defined in this plugin are set with the follo
 * `type`: The type of the NSX-T resource
 * `resource_config`: The resource configuration returned from resource creation
 
+ 
  
 ## Node Types
 
@@ -254,7 +259,7 @@ This node type refers to a Virtual Machine resource.
   * `vm_name`: _String_. _Not required_. The Name of VM.
   * `network_id`: _String_. _Required_. The network id to get ips from.
 
-## Runtime Properties    
+### Runtime Properties    
 
 Beside the common runtime properties, the `VirtualMachine` node type also expose the following two runtime properties:
   * `networks`: _Dict_. Dictionary of all virtual network interfaces attached to the current vm.
@@ -349,3 +354,54 @@ Note: The configuration for the above resources are based on the NSX-T API docum
    3. [Tier1 Endpoints](https://vdc-download.vmware.com/vmwb-repository/dcr-public/9e1c6bcc-85db-46b6-bc38-d6d2431e7c17/30af91b5-3a91-4d5d-8ed5-a7d806764a16/api_includes/policy_networking_connectivity_tier-1_gateways_tier-1_gateways.html)
    4. [Virtual Interface Endpoints](https://vdc-download.vmware.com/vmwb-repository/dcr-public/9e1c6bcc-85db-46b6-bc38-d6d2431e7c17/30af91b5-3a91-4d5d-8ed5-a7d806764a16/api_includes/system_administration_configuration_fabric_inventory_virtual_interfaces.html)
    5. [Virtual Machines Endpoints](https://vdc-download.vmware.com/vmwb-repository/dcr-public/9e1c6bcc-85db-46b6-bc38-d6d2431e7c17/30af91b5-3a91-4d5d-8ed5-a7d806764a16/api_includes/method_ListVirtualMachines.html)
+   6. [DHCP Static Binding Endpoints](https://vdc-download.vmware.com/vmwb-repository/dcr-public/9e1c6bcc-85db-46b6-bc38-d6d2431e7c17/30af91b5-3a91-4d5d-8ed5-a7d806764a16/api_includes/method_CreateOrReplaceInfraSegmentDhcpStaticBinding.html)
+ 
+ 
+## Vsphere Server Relationships
+
+We support a relationship called `cloudify.relationships.server_connected_to_segment` 
+that support dhcp static binding where a  static ip attached to the server that has the following operations:
+
+* `cloudify.interfaces.relationship_lifecycle.preconfigure`:
+    * `network_unique_id`: _String_. The uuid of segment must be passed which will be exposed as runtime property for Segment node
+    * `ip_v4_address`: _String_. The ip address v4 that is going to be assigned to the server.
+    * `ip_v6_address`: _String_. The ip address v6 that is going to be assigned to the server.
+    
+    Notes:
+    1. One or both of `ip_v4_address`, `ip_v6_address` must be provided otherwise the operation will raise error
+    2. If `network_unique_id` is not provided, then plugin will try to lookup it internally.
+
+* `cloudify.interfaces.relationship_lifecycle.unlink`: This operation will remove all the static dhcp binding created before
+
+```yaml
+  host:
+    type: cloudify.vsphere.nodes.Server
+    properties:
+      client_config:
+        host: { get_input: host }
+        port: { get_input: port }
+        username: { get_input: username }
+        password: { get_input: password }
+      agent_config:
+        install_method: none
+      allowed_clusters: { get_input: allowed_clusters }
+      server:
+        name: { get_input: server_name }
+        template: { get_input: template }
+        cpus: 1
+        memory: 1024
+      networking:
+        connect_networks:
+          - name: { get_attribute: [ segment, name ] }
+            nsx_t_switch: { get_input: nsx_t_switch }
+            use_dhcp: true
+    relationships:
+      - type: cloudify.relationships.server_connected_to_segment
+        target: segment
+        target_interfaces:
+          cloudify.interfaces.relationship_lifecycle:
+            preconfigure:
+              inputs:
+                network_unique_id: { get_attribute: [ segment, unique_id ] }
+                ip_v4_address: { get_input: ip_address }
+```

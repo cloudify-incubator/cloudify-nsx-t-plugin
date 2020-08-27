@@ -121,7 +121,7 @@ node_templates:
             preconfigure:
               inputs:
                 network_unique_id: { get_attribute: [ segment, unique_id ] }
-                ip_address: { get_input: ip_address }
+                ip_v4_address: { get_input: ip_address }
 
   virtual_machine_inventory:
     type: cloudify.nodes.nsx-t.inventory.VirtualMachine
