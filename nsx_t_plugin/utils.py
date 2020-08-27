@@ -17,6 +17,8 @@ from cloudify import ctx
 from cloudify.exceptions import NonRecoverableError, OperationRetry
 from cloudify.constants import NODE_INSTANCE, RELATIONSHIP_INSTANCE
 
+from com.vmware.vapi.std.errors_client import NotFound, Error
+
 from nsx_t_sdk.exceptions import NSXTSDKException
 from nsx_t_plugin.constants import (
     DELETE_OPERATION,
@@ -201,7 +203,7 @@ def validate_if_resource_deleted(nsx_t_resource):
     """
     try:
         nsx_t_resource.get()
-    except NSXTSDKException:
+    except NotFound:
         ctx.logger.info(
             '{0} {1} is deleted successfully'.format(
                 nsx_t_resource.resource_type,
@@ -212,7 +214,7 @@ def validate_if_resource_deleted(nsx_t_resource):
 
     try:
         nsx_t_resource.delete(nsx_t_resource.resource_id)
-    except NSXTSDKException:
+    except Error:
         raise OperationRetry(
             message='{0} {1} deletion is in progress.'.format(
                 nsx_t_resource.resource_type,

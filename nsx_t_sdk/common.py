@@ -19,7 +19,6 @@ from vmware.vapi.lib import connect
 from vmware.vapi.security import user_password
 from vmware.vapi.stdlib.client.factories import StubConfigurationFactory
 from vmware.vapi.bindings.stub import ApiClient
-from vmware.vapi.bindings.error import VapiError
 
 from com.vmware import nsx_policy_client
 from com.vmware import nsx_client
@@ -28,7 +27,6 @@ from com.vmware.nsx import fabric_client
 from com.vmware.nsx_policy.infra import segments_client, tier_1s_client
 
 from nsx_t_sdk import exceptions
-from nsx_t_sdk._compat import text_type
 
 AUTH_SESSION = 'session'
 AUTH_BASIC = 'basic'
@@ -164,17 +162,14 @@ class NSXTResource(object):
         self.logger.debug('HTTP Request Kwargs: {0}'.format(kwargs))
         service_client = getattr(self._api_client, self.service_name)
         service_action = getattr(service_client, action)
-        try:
-            if args and kwargs:
-                result = service_action(*args, **kwargs)
-            elif args:
-                result = service_action(*args)
-            elif kwargs:
-                result = service_action(**kwargs)
-            else:
-                result = service_action()
-        except VapiError as error:
-            raise exceptions.NSXTSDKException(text_type(error))
+        if args and kwargs:
+            result = service_action(*args, **kwargs)
+        elif args:
+            result = service_action(*args)
+        elif kwargs:
+            result = service_action(**kwargs)
+        else:
+            result = service_action()
 
         self.logger.debug(
             'API Request Result: {0} '
