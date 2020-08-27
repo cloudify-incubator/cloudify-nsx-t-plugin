@@ -13,6 +13,8 @@
 #    * See the License for the specific language governing permissions and
 #    * limitations under the License.
 
+import time
+
 from cloudify import ctx
 from cloudify.exceptions import NonRecoverableError, OperationRetry
 
@@ -21,6 +23,7 @@ from nsx_t_plugin.constants import (
     STATE_IN_PROGRESS,
     STATE_SUCCESS,
     STATE_PENDING,
+    STATE_IN_SYNC
 )
 from nsx_t_plugin.utils import (
     validate_if_resource_started,
@@ -121,20 +124,24 @@ def _handle_dhcp_static_bindings(
             ctx.target.instance.runtime_properties[
                 'dhcp_{0}_static_binding'.format(dhcp_type)] = \
                 dhcp_binding_response.to_dict()
-        else:
-            static_state = DhcpStaticBindingState(
-                client_config=client_config,
-                resource_config={},
-                logger=ctx.logger
-            )
 
-            validate_if_resource_started(
-                'DhcpStaticBinding',
-                static_state,
-                [STATE_PENDING, STATE_IN_PROGRESS],
-                [STATE_SUCCESS],
-                args=(segment_id, dhcp_binding.resource_id,)
-            )
+        ctx.logger.info(
+            'Waiting 30 seconds before get'
+            ' the state of the bindings'
+        )
+        time.sleep(30)
+        static_state = DhcpStaticBindingState(
+            client_config=client_config,
+            resource_config={},
+            logger=ctx.logger
+        )
+        validate_if_resource_started(
+            'DhcpStaticBinding',
+            static_state,
+            [STATE_PENDING, STATE_IN_PROGRESS],
+            [STATE_SUCCESS, STATE_IN_SYNC],
+            args=(segment_id, dhcp_binding.resource_id,)
+        )
 
 
 def _create_dhcp_static_binding_configs(

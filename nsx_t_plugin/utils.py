@@ -201,7 +201,7 @@ def validate_if_resource_deleted(nsx_t_resource, args=None):
     """
     This method will validate if the NSXT resource get deleted or not
     :param nsx_t_resource: Instance derived from "NSXTResource" class
-    :param extra arga to passed to when lookup nsxt object
+    :param args extra to passed to when lookup nsxt object
     """
     try:
         nsx_t_resource.get(args=args)

@@ -105,7 +105,7 @@ class VirtualMachine(NSXTResource):
     allow_update = False
     allow_patch = False
 
-    def get(self, to_dict=True):
+    def get(self, args=None, to_dict=True):
         self._validate_allowed_method(self.allow_get, ACTION_GET)
         display_name = self.resource_config.get('vm_name')
         external_id = self.resource_config.get('vm_id')
@@ -119,6 +119,7 @@ class VirtualMachine(NSXTResource):
             filters={
                 'display_name': display_name, 'external_id': external_id
             },
+            to_dict=to_dict
         )
         error_message = ''
         if not results:
