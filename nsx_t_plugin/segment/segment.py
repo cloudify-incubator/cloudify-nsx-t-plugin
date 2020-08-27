@@ -14,7 +14,7 @@
 #    * limitations under the License.
 
 from cloudify import ctx
-from cloudify.exceptions import NonRecoverableError
+from cloudify.exceptions import NonRecoverableError, OperationRetry
 
 from nsx_t_plugin.decorators import with_nsx_t_client
 from nsx_t_plugin.constants import (
@@ -133,6 +133,56 @@ def _create_dhcp_static_binding_configs(
             dhcp_v6_binding_response.to_dict()
 
 
+def _clean_segments_port(segment_id, client_config):
+    segment_port = SegmentPort(
+        client_config=client_config,
+        logger=ctx.logger,
+        resource_config={}
+    )
+    for nsx_t_port in segment_port.list(
+            filters={
+                'segment_id': segment_id
+            }
+    ):
+        segment_port.resource_id = nsx_t_port['id']
+        segment_port.delete(segment_id, nsx_t_port['id'])
+
+
+def _wait_on_dhcp_static_bindings(segment_id, client_config):
+    dhcp_v4_binding = DhcpV4StaticBindingConfig(
+        client_config=client_config,
+        resource_config={},
+        logger=ctx.logger
+    )
+
+    dhcp_v6_binding = DhcpV4StaticBindingConfig(
+        client_config=client_config,
+        resource_config={},
+        logger=ctx.logger
+    )
+
+    bindings_v4 = []
+    bindings_v6 = []
+    for static_v4_bindings in dhcp_v4_binding.list(
+            filters={
+                'segment_id': segment_id
+            }
+    ):
+        bindings_v4.append(static_v4_bindings['id'])
+
+    for dhcp_v6_binding in dhcp_v6_binding.list(
+            filters={
+                'segment_id': segment_id
+            }
+    ):
+        bindings_v6.append(dhcp_v6_binding['id'])
+
+    if any([bindings_v4, bindings_v6]):
+        raise OperationRetry(
+            'There are still some DHCP static binding not removed yet'
+        )
+
+
 @with_nsx_t_client(Segment)
 def create(nsx_t_resource):
     # Update the subnet configuration for segment
@@ -158,22 +208,15 @@ def start(nsx_t_resource):
 
 @with_nsx_t_client(Segment)
 def stop(nsx_t_resource):
-    segment_port = SegmentPort(
-        client_config=nsx_t_resource.client_config,
-        logger=ctx.logger,
-        resource_config={}
+    _clean_segments_port(
+        nsx_t_resource.resource_id,
+        nsx_t_resource.client_config
     )
-    for nsx_t_port in segment_port.list(
-            filters={
-                'segment_id': nsx_t_resource.resource_id
-            }
-    ):
-        port = SegmentPort(
-            client_config=nsx_t_resource.client_config,
-            logger=ctx.logger,
-            resource_config={'id': nsx_t_port['id']}
-        )
-        port.delete(nsx_t_resource.resource_id, nsx_t_port['id'])
+
+    _wait_on_dhcp_static_bindings(
+        nsx_t_resource.resource_id,
+        nsx_t_resource.client_config
+    )
 
 
 @with_nsx_t_client(Segment)

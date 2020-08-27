@@ -19,7 +19,6 @@ from cloudify.constants import NODE_INSTANCE, RELATIONSHIP_INSTANCE
 
 from com.vmware.vapi.std.errors_client import NotFound, Error
 
-from nsx_t_sdk.exceptions import NSXTSDKException
 from nsx_t_plugin.constants import (
     DELETE_OPERATION,
     CREATE_OPERATION,

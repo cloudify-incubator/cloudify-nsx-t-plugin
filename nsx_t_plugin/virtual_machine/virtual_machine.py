@@ -16,7 +16,7 @@
 from IPy import IP
 
 from cloudify import ctx
-from cloudify.exceptions import NonRecoverableError
+from cloudify.exceptions import NonRecoverableError, OperationRetry
 
 from nsx_t_plugin.decorators import with_nsx_t_client
 from nsx_t_sdk.resources import (
@@ -74,26 +74,28 @@ def _populate_networks_for_virtual_machine(
 ):
     ports = _lookup_segment_ports(client_config, network_id)
     if not ports:
-        raise NonRecoverableError(
-            'Network {0} is not connected to any device'.format(network_id))
-    networks_obj = {}
-    networks_obj['networks'] = {}
-    target_network = {}
-    for network in networks:
-        _update_network_with_ipv4_and_ipv6(network)
+        raise OperationRetry(
+            'Network {0} is still not connected to any device'.format(
+                network_id))
+    else:
+        networks_obj = {}
+        networks_obj['networks'] = {}
+        target_network = {}
+        for network in networks:
+            _update_network_with_ipv4_and_ipv6(network)
+            if not target_network:
+                target_network = _get_target_network(ports, network)
+            networks_obj['networks'][network['display_name']] = network
+
         if not target_network:
-            target_network = _get_target_network(ports, network)
-        networks_obj['networks'][network['display_name']] = network
+            raise NonRecoverableError(
+                'The selected network {0} is not '
+                'attached to target virtual machine {1}'
+                ''.format(network_id, owner_vm_id)
+            )
 
-    if not target_network:
-        raise NonRecoverableError(
-            'The selected network {0} is not '
-            'attached to target virtual machine {1}'
-            ''.format(network_id, owner_vm_id)
-        )
-
-    ctx.instance.runtime_properties[network_id] = target_network
-    ctx.instance.runtime_properties['networks'] = networks_obj
+        ctx.instance.runtime_properties[network_id] = target_network
+        ctx.instance.runtime_properties['networks'] = networks_obj
 
 
 @with_nsx_t_client(VirtualMachine)

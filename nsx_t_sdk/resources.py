@@ -149,8 +149,17 @@ class VirtualNetworkInterface(NSXTResource):
              page_size=None,
              sort_ascending=None,
              sort_by=None,
-             filters=None
+             filters=None,
+             to_dict=True
              ):
         self._validate_allowed_method(self.allow_list, ACTION_LIST)
-        results = super(VirtualNetworkInterface, self).list(filters=filters)
+        results = super(VirtualNetworkInterface, self).list(
+            cursor=cursor,
+            included_fields=included_fields,
+            page_size=page_size,
+            sort_ascending=sort_ascending,
+            sort_by=sort_by,
+            filters=filters,
+            to_dict=to_dict
+        )
         return results
