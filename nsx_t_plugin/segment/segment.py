@@ -16,7 +16,7 @@
 import time
 
 from cloudify import ctx
-from cloudify.exceptions import NonRecoverableError, OperationRetry
+from cloudify.exceptions import NonRecoverableError
 
 from nsx_t_plugin.decorators import with_nsx_t_client
 from nsx_t_plugin.constants import (
