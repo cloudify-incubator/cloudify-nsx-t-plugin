@@ -165,7 +165,8 @@ def validate_if_resource_started(
         resource_name,
         nsx_t_state,
         pending_states,
-        ready_states
+        ready_states,
+        args=None
 ):
     """
     This method will validate if the nsx_t_resource is ready to use and started
@@ -173,8 +174,9 @@ def validate_if_resource_started(
     :param nsx_t_state: Instance derived from "NSXTResource" class
     :param pending_states: List of pending state to wait for
     :param ready_states: List of ready states to say that resource is ready
+    :param args any extra args to passed to the get state api
     """
-    resource_state = nsx_t_state.get()
+    resource_state = nsx_t_state.get(args=args)
     state = resource_state[nsx_t_state.state_attr]
     if isinstance(state, dict):
         state = state['state']

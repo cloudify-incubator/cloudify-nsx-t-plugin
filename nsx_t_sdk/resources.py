@@ -24,6 +24,7 @@ from nsx_t_sdk.exceptions import NSXTSDKException
 class State(NSXTResource):
     service_name = 'State'
     state_attr = 'state'
+
     allow_create = False
     allow_delete = False
     allow_get = True
@@ -59,6 +60,11 @@ class SegmentState(State):
 class DhcpStaticBindingConfigs(NSXTResource):
     client_type = 'segment'
     service_name = 'DhcpStaticBindingConfigs'
+
+
+class DhcpStaticBindingState(State):
+    client_type = 'dhcp_static_bindings'
+    resource_type = 'DhcpStaticBindingState'
 
 
 class DhcpV4StaticBindingConfig(DhcpStaticBindingConfigs):

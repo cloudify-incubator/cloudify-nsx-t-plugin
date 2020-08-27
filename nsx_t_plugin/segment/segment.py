@@ -29,9 +29,9 @@ from nsx_t_plugin.utils import (
 from nsx_t_sdk.resources import (
     Segment,
     SegmentState,
-    SegmentPort,
     DhcpV4StaticBindingConfig,
-    DhcpV6StaticBindingConfig
+    DhcpV6StaticBindingConfig,
+    DhcpStaticBindingState
 )
 
 
@@ -96,56 +96,67 @@ def _prepare_dhcp_static_binding_configs(
     return dhcp_v4_config, dhcp_v6_config
 
 
+def _handle_dhcp_static_bindings(
+        class_type,
+        dhcp_type,
+        segment_id,
+        client_config,
+        dhcp_config):
+    tasks = ctx.target.instance.runtime_properties.setdefault('tasks', {})
+    if dhcp_config:
+        dhcp_binding = class_type(
+            client_config=client_config,
+            logger=ctx.logger,
+            resource_config=dhcp_config)
+        if not tasks.get(dhcp_config['id']):
+            dhcp_binding_response = dhcp_binding.update(
+                segment_id,
+                dhcp_binding.resource_id,
+                dhcp_config
+            )
+            tasks[dhcp_config['id']] = True
+            ctx.target.instance.runtime_properties[
+                'dhcp_{0}_static_binding_id'.format(dhcp_type)] = \
+                dhcp_binding.resource_id
+            ctx.target.instance.runtime_properties[
+                'dhcp_{0}_static_binding'.format(dhcp_type)] = \
+                dhcp_binding_response.to_dict()
+        else:
+            static_state = DhcpStaticBindingState(
+                client_config=client_config,
+                resource_config={},
+                logger=ctx.logger
+            )
+
+            validate_if_resource_started(
+                'DhcpStaticBinding',
+                static_state,
+                [STATE_PENDING, STATE_IN_PROGRESS],
+                [STATE_SUCCESS],
+                args=(segment_id, dhcp_binding.resource_id,)
+            )
+
+
 def _create_dhcp_static_binding_configs(
         segment_id,
         client_config,
         dhcp_v4_config,
         dhcp_v6_config
 ):
-    if dhcp_v4_config:
-        dhcp_v4_binding = DhcpV4StaticBindingConfig(
-            client_config=client_config,
-            logger=ctx.logger,
-            resource_config=dhcp_v4_config)
-        dhcp_v4_binding_response = dhcp_v4_binding.update(
-            segment_id,
-            dhcp_v4_binding.resource_id,
-            dhcp_v4_config
-        )
-        ctx.target.instance.runtime_properties['dhcp_v4_static_binding_id'] = \
-            dhcp_v4_binding.resource_id
-        ctx.target.instance.runtime_properties['dhcp_v4_static_binding'] = \
-            dhcp_v4_binding_response.to_dict()
-
-    if dhcp_v6_config:
-        dhcp_v6_binding = DhcpV6StaticBindingConfig(
-            client_config=client_config,
-            logger=ctx.logger,
-            resource_config=dhcp_v6_config)
-        dhcp_v6_binding_response = dhcp_v6_binding.update(
-            segment_id,
-            dhcp_v6_binding.resource_id,
-            dhcp_v6_config
-        )
-        ctx.target.instance.runtime_properties['dhcp_v6_static_binding_id'] = \
-            dhcp_v6_binding.resource_id
-        ctx.target.instance.runtime_properties['dhcp_v6_static_binding'] = \
-            dhcp_v6_binding_response.to_dict()
-
-
-def _clean_segments_port(segment_id, client_config):
-    segment_port = SegmentPort(
-        client_config=client_config,
-        logger=ctx.logger,
-        resource_config={}
+    _handle_dhcp_static_bindings(
+        DhcpV4StaticBindingConfig,
+        'v4',
+        segment_id,
+        client_config,
+        dhcp_v4_config
     )
-    for nsx_t_port in segment_port.list(
-            filters={
-                'segment_id': segment_id
-            }
-    ):
-        segment_port.resource_id = nsx_t_port['id']
-        segment_port.delete(segment_id, nsx_t_port['id'])
+    _handle_dhcp_static_bindings(
+        DhcpV6StaticBindingConfig,
+        'v6',
+        segment_id,
+        client_config,
+        dhcp_v6_config
+    )
 
 
 def _wait_on_dhcp_static_bindings(segment_id, client_config):
@@ -208,11 +219,6 @@ def start(nsx_t_resource):
 
 @with_nsx_t_client(Segment)
 def stop(nsx_t_resource):
-    _clean_segments_port(
-        nsx_t_resource.resource_id,
-        nsx_t_resource.client_config
-    )
-
     _wait_on_dhcp_static_bindings(
         nsx_t_resource.resource_id,
         nsx_t_resource.client_config
@@ -282,7 +288,10 @@ def remove_static_bindings(nsx_t_resource):
             resource_config={'id': dhcp_v4_static_binding_id},
             logger=ctx.logger
         )
-        dhcp_v4_binding.delete(nsx_t_resource.id, dhcp_v4_static_binding_id)
+        dhcp_v4_binding.delete(
+            nsx_t_resource.resource_id,
+            dhcp_v4_static_binding_id
+        )
 
     if dhcp_v6_static_binding_id:
         dhcp_v6_binding = DhcpV6StaticBindingConfig(
@@ -290,4 +299,7 @@ def remove_static_bindings(nsx_t_resource):
             resource_config={'id': dhcp_v6_static_binding_id},
             logger=ctx.logger
         )
-        dhcp_v6_binding.delete(nsx_t_resource.id, dhcp_v6_static_binding_id)
+        dhcp_v6_binding.delete(
+            nsx_t_resource.resource_id,
+            dhcp_v6_static_binding_id
+        )

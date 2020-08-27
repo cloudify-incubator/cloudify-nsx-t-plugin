@@ -24,6 +24,7 @@ from com.vmware import nsx_policy_client
 from com.vmware import nsx_client
 from com.vmware.nsx_policy import infra_client
 from com.vmware.nsx import fabric_client
+from com.vmware.nsx_policy.infra.segments import dhcp_static_bindings_client
 from com.vmware.nsx_policy.infra import segments_client, tier_1s_client
 
 from nsx_t_sdk import exceptions
@@ -70,7 +71,8 @@ class NSXTResource(object):
             'nsx_infra': infra_client,
             'segment': segments_client,
             'tier_1': tier_1s_client,
-            'fabric': fabric_client
+            'fabric': fabric_client,
+            'dhcp_static_bindings': dhcp_static_bindings_client
         }
 
     def _get_stub_factory_for_nsx_client(self, stub_config):
@@ -206,11 +208,12 @@ class NSXTResource(object):
         self._validate_allowed_method(self.allow_delete, ACTION_DELETE)
         return self._invoke(ACTION_DELETE, args)
 
-    def get(self, to_dict=True):
+    def get(self, args=None, to_dict=True):
+        args = args if args else (self.resource_id,)
         self._validate_allowed_method(self.allow_get, ACTION_GET)
         if to_dict:
-            return self._invoke(ACTION_GET, (self.resource_id,)).to_dict()
-        return self._invoke(ACTION_GET, (self.resource_id,))
+            return self._invoke(ACTION_GET, args).to_dict()
+        return self._invoke(ACTION_GET, args)
 
     def list(self,
              cursor=None,
