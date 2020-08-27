@@ -347,16 +347,7 @@ Beside the common runtime properties, the `VirtualMachine` node type also expose
       - type: cloudify.relationships.depends_on
         target: segment
 ```  
-
-Note: The configuration for the above resources are based on the NSX-T API documentation:
-   1. [Segment Endpoints](https://vdc-download.vmware.com/vmwb-repository/dcr-public/9e1c6bcc-85db-46b6-bc38-d6d2431e7c17/30af91b5-3a91-4d5d-8ed5-a7d806764a16/api_includes/policy_networking_connectivity_segment.html)
-   2. [DHCP Server Endpoints](https://vdc-download.vmware.com/vmwb-repository/dcr-public/9e1c6bcc-85db-46b6-bc38-d6d2431e7c17/30af91b5-3a91-4d5d-8ed5-a7d806764a16/api_includes/policy_networking_ip_management_dhcp_dhcp_server_configs.html)
-   3. [Tier1 Endpoints](https://vdc-download.vmware.com/vmwb-repository/dcr-public/9e1c6bcc-85db-46b6-bc38-d6d2431e7c17/30af91b5-3a91-4d5d-8ed5-a7d806764a16/api_includes/policy_networking_connectivity_tier-1_gateways_tier-1_gateways.html)
-   4. [Virtual Interface Endpoints](https://vdc-download.vmware.com/vmwb-repository/dcr-public/9e1c6bcc-85db-46b6-bc38-d6d2431e7c17/30af91b5-3a91-4d5d-8ed5-a7d806764a16/api_includes/system_administration_configuration_fabric_inventory_virtual_interfaces.html)
-   5. [Virtual Machines Endpoints](https://vdc-download.vmware.com/vmwb-repository/dcr-public/9e1c6bcc-85db-46b6-bc38-d6d2431e7c17/30af91b5-3a91-4d5d-8ed5-a7d806764a16/api_includes/method_ListVirtualMachines.html)
-   6. [DHCP Static Binding Endpoints](https://vdc-download.vmware.com/vmwb-repository/dcr-public/9e1c6bcc-85db-46b6-bc38-d6d2431e7c17/30af91b5-3a91-4d5d-8ed5-a7d806764a16/api_includes/method_CreateOrReplaceInfraSegmentDhcpStaticBinding.html)
- 
- 
+  
 ## Vsphere Server Relationships
 
 We support a relationship called `cloudify.relationships.server_connected_to_segment` 
@@ -405,3 +396,11 @@ that support dhcp static binding where a  static ip attached to the server that 
                 network_unique_id: { get_attribute: [ segment, unique_id ] }
                 ip_v4_address: { get_input: ip_address }
 ```
+
+Notes: The configuration for the above resources are based on the NSX-T API documentation:
+   1. [Segment Endpoints](https://vdc-download.vmware.com/vmwb-repository/dcr-public/9e1c6bcc-85db-46b6-bc38-d6d2431e7c17/30af91b5-3a91-4d5d-8ed5-a7d806764a16/api_includes/policy_networking_connectivity_segment.html)
+   2. [DHCP Server Endpoints](https://vdc-download.vmware.com/vmwb-repository/dcr-public/9e1c6bcc-85db-46b6-bc38-d6d2431e7c17/30af91b5-3a91-4d5d-8ed5-a7d806764a16/api_includes/policy_networking_ip_management_dhcp_dhcp_server_configs.html)
+   3. [Tier1 Endpoints](https://vdc-download.vmware.com/vmwb-repository/dcr-public/9e1c6bcc-85db-46b6-bc38-d6d2431e7c17/30af91b5-3a91-4d5d-8ed5-a7d806764a16/api_includes/policy_networking_connectivity_tier-1_gateways_tier-1_gateways.html)
+   4. [Virtual Interface Endpoints](https://vdc-download.vmware.com/vmwb-repository/dcr-public/9e1c6bcc-85db-46b6-bc38-d6d2431e7c17/30af91b5-3a91-4d5d-8ed5-a7d806764a16/api_includes/system_administration_configuration_fabric_inventory_virtual_interfaces.html)
+   5. [Virtual Machines Endpoints](https://vdc-download.vmware.com/vmwb-repository/dcr-public/9e1c6bcc-85db-46b6-bc38-d6d2431e7c17/30af91b5-3a91-4d5d-8ed5-a7d806764a16/api_includes/method_ListVirtualMachines.html)
+   6. [DHCP Static Binding Endpoints](https://vdc-download.vmware.com/vmwb-repository/dcr-public/9e1c6bcc-85db-46b6-bc38-d6d2431e7c17/30af91b5-3a91-4d5d-8ed5-a7d806764a16/api_includes/method_CreateOrReplaceInfraSegmentDhcpStaticBinding.html)
