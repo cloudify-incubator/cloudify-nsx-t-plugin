@@ -75,8 +75,9 @@ def _populate_networks_for_virtual_machine(
     ports = _lookup_segment_ports(client_config, network_id)
     if not ports:
         raise OperationRetry(
-            'Network {0} is still not connected to any device'.format(
-                network_id))
+            'Network {0} is not connected to any virtual machine'.format(
+                network_id)
+        )
     else:
         networks_obj = {}
         networks_obj['networks'] = {}
@@ -88,14 +89,14 @@ def _populate_networks_for_virtual_machine(
             networks_obj['networks'][network['display_name']] = network
 
         if not target_network:
-            raise NonRecoverableError(
-                'The selected network {0} is not '
+            raise OperationRetry(
+                'The selected network {0} still not '
                 'attached to target virtual machine {1}'
                 ''.format(network_id, owner_vm_id)
             )
-
-        ctx.instance.runtime_properties[network_id] = target_network
-        ctx.instance.runtime_properties['networks'] = networks_obj
+        else:
+            ctx.instance.runtime_properties[network_id] = target_network
+            ctx.instance.runtime_properties['networks'] = networks_obj
 
 
 @with_nsx_t_client(VirtualMachine)

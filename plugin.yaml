@@ -16,8 +16,8 @@
 plugins:
   nsx-t:
     package_name: cloudify-nsx-t-plugin
-    source: https://github.com/Cloudify-PS/cloudify-nsx-t-plugin/archive/0.3.1.zip
-    package_version: '0.3.1'
+    source: https://github.com/Cloudify-PS/cloudify-nsx-t-plugin/archive/0.3.2.zip
+    package_version: '0.3.2'
     executor: central_deployment_agent
 
 dsl_definitions:
@@ -102,7 +102,7 @@ data_types:
           DHCP lease time in seconds. When specified, this property overwrites
           lease time configured DHCP server config.
       server_address:
-        type: list
+        type: string
         required: false
         description: >
           IP address of the DHCP server in CIDR format.
