@@ -49,8 +49,13 @@ inputs:
     type: string
     default: Cluster
 
+  wait_ip:
+    type: boolean
+    default: true
+
   ip_v4_address:
     type: string
+    default: '192.168.11.95'
 
 dsl_definitions:
 
@@ -103,6 +108,7 @@ node_templates:
       agent_config:
         install_method: none
       allowed_clusters: { get_input: allowed_clusters }
+      wait_ip: { get_input: wait_ip }
       server:
         name: { get_input: server_name }
         template: { get_input: template }
