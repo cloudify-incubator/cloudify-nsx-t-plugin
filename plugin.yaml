@@ -102,7 +102,7 @@ data_types:
           DHCP lease time in seconds. When specified, this property overwrites
           lease time configured DHCP server config.
       server_address:
-        type: list
+        type: string
         required: false
         description: >
           IP address of the DHCP server in CIDR format.
