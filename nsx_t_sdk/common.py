@@ -41,7 +41,7 @@ ACTION_LIST = 'list'
 
 
 class NSXTResource(object):
-    client_type = False
+    client_type = None
 
     resource_type = None
     service_name = None
@@ -127,6 +127,15 @@ class NSXTResource(object):
         session.headers['X-XSRF-TOKEN'] = resp.headers.get('X-XSRF-TOKEN')
         self.logger.debug('Session Cookie & X-XSRF-TOKEN are set successfully')
 
+    def _prepare_basic_auth(self, connector):
+        self.logger.debug('API calls is using basic authentication')
+        security_context = \
+            user_password.create_user_password_security_context(
+                self.username,
+                self.password
+            )
+        connector.set_security_context(security_context)
+
     def _prepare_nsx_t_client(self):
         session = requests.session()
         session.verify = self.insecure
@@ -147,13 +156,7 @@ class NSXTResource(object):
         )
         # Only relevant for basic auth
         if self.auth_type == AUTH_BASIC:
-            self.logger.debug('API calls is using basic authentication')
-            security_context = \
-                user_password.create_user_password_security_context(
-                    self.username,
-                    self.password
-                )
-            connector.set_security_context(security_context)
+            self._prepare_basic_auth(connector)
         stub_factory = self._get_stub_factory_for_nsx_client(stub_config)
         return ApiClient(stub_factory)
 
