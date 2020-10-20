@@ -208,8 +208,7 @@ class SegmentStateTestCase(NSXTSDKTestCase):
     def setUp(self):
         super(SegmentStateTestCase, self).setUp()
         self.resource_config = {
-            'id': 'segment_id',
-            'display_name': 'segment_name'
+            'id': 'segment_id'
         }
         self.segment_state = SegmentState(
             self.client_config,
@@ -249,7 +248,7 @@ class SegmentStateTestCase(NSXTSDKTestCase):
     def test_update_segment_state_not_allowed(self):
         with self.assertRaises(MethodNotAllowed):
             self.segment_state.update(
-                'segment_port_id',
+                'segment_id',
                 {
                     'display_name':  'updated_segment_name'
                 }
