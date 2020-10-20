@@ -24,6 +24,7 @@ from cloudify.state import current_ctx
 from cloudify.mocks import (
     MockCloudifyContext,
     MockNodeContext,
+    MockContext,
     MockNodeInstanceContext,
     MockRelationshipContext,
     MockRelationshipSubjectContext,
@@ -33,6 +34,16 @@ from cloudify.mocks import (
 class CustomMockCloudifyContext(MockCloudifyContext):
     def __init__(self, *args, **kwargs):
         super(CustomMockCloudifyContext, self).__init__(*args, **kwargs)
+
+    @property
+    def workflow_id(self):
+        return 'workflow'
+
+
+class CustomMockContext(MockContext):
+
+    def __init__(self, *args, **kwargs):
+        super(CustomMockContext, self).__init__(*args, **kwargs)
 
     @property
     def workflow_id(self):
@@ -59,14 +70,14 @@ class CustomMockNodeContext(MockNodeContext):
         return self._type_hierarchy
 
 
-class NSXTTestBase(unittest.TestCase):
+class NSXTPluginTestBase(unittest.TestCase):
 
     def setUp(self):
-        super(NSXTTestBase, self).setUp()
+        super(NSXTPluginTestBase, self).setUp()
 
     def tearDown(self):
         current_ctx.clear()
-        super(NSXTTestBase, self).tearDown()
+        super(NSXTPluginTestBase, self).tearDown()
 
     def _to_DirtyTrackingDict(self, origin):
         if not origin:

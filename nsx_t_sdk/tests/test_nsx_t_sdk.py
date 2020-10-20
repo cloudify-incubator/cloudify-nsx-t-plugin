@@ -27,6 +27,7 @@ from nsx_t_sdk.common import NSXTResource
 class MockSessionResponse(object):
     def __init__(self, status_code):
         self.status_code = status_code
+        self.headers = {}
 
     def raise_for_status(self):
         raise requests.HTTPError('HTTP Error')
@@ -97,7 +98,7 @@ class NSXTSDKTestCase(unittest.TestCase):
 
     @mock.patch('nsx_t_sdk.common.NSXTResource._get_nsx_client_map')
     @mock.patch('nsx_t_sdk.common.NSXTResource._prepare_basic_auth')
-    def test_nsx_t_client_with_basic_auth(self, _, prepare_basic_auth_mock):
+    def test_nsx_t_client_with_basic_auth(self, prepare_basic_auth_mock, _):
         _ = NSXTResource(
             self.client_config, {
                 'id': 'resource_id',
@@ -110,7 +111,7 @@ class NSXTSDKTestCase(unittest.TestCase):
     @mock.patch('nsx_t_sdk.common.NSXTResource._get_nsx_client_map')
     @mock.patch('nsx_t_sdk.common.NSXTResource._prepare_session_auth')
     def test_nsx_t_client_with_session_auth(
-            self, _, prepare_session_auth_mock):
+            self, prepare_session_auth_mock, _):
         self.client_config['auth_type'] = 'session'
         _ = NSXTResource(
             self.client_config, {
@@ -141,9 +142,9 @@ class NSXTSDKTestCase(unittest.TestCase):
     @mock.patch('nsx_t_sdk.common.requests.Session.post')
     def test_valid_session_requests(
             self,
-            factory_mock,
+            post_mock,
             client_map_mock,
-            post_mock):
+            factory_mock):
         post_mock.return_value = MockSessionResponse(status_code=200)
         self.client_config['auth_type'] = 'session'
         NSXTResource(
