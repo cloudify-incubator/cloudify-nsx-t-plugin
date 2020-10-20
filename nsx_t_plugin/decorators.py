@@ -36,7 +36,6 @@ def with_nsx_t_client(class_decl):
         def wrapper(**kwargs):
             _ctx = kwargs.pop('ctx', CloudifyContext)
             operation_name = _ctx.operation.name
-            print(operation_name)
             _ctx = get_ctx_object(_ctx)
             kwargs['nsx_t_resource'] = populate_nsx_t_instance_from_ctx(
                 class_decl,

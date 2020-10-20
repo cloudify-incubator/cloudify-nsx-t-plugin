@@ -38,6 +38,7 @@ class DecoratorTestCase(NSXTPluginTestBase):
             test_properties=self.node_properties,
             ctx_operation_name='cloudify.interfaces.lifecycle.create')
         func = mock.Mock()
+        func.__name__ = 'foo_func'
         with mock.patch('nsx_t_sdk.common.NSXTResource._prepare_nsx_t_client'):
             with mock.patch(
                     'nsx_t_plugin.utils'
@@ -57,6 +58,7 @@ class DecoratorTestCase(NSXTPluginTestBase):
             ctx_operation_name='cloudify.interfaces.lifecycle.delete')
 
         func = mock.Mock()
+        func.__name__ = 'foo_func'
         with mock.patch('nsx_t_sdk.common.NSXTResource._prepare_nsx_t_client'):
             with mock.patch(
                     'nsx_t_plugin.utils'
@@ -74,6 +76,7 @@ class DecoratorTestCase(NSXTPluginTestBase):
             test_properties=self.node_properties,
             ctx_operation_name='foot.operation')
         func = mock.Mock()
+        func.__name__ = 'foo_func'
         with mock.patch('nsx_t_sdk.common.NSXTResource._prepare_nsx_t_client'):
             with_nsx_t_client(NSXTResource)(func)()
             mock_set.assert_not_called()
@@ -125,6 +128,7 @@ class DecoratorTestCase(NSXTPluginTestBase):
             node_id='1'
         )
         func = mock.Mock()
+        func.__name__ = 'foo_func'
         with mock.patch('nsx_t_sdk.common.NSXTResource._prepare_nsx_t_client'):
             with_nsx_t_client(NSXTResource)(func)()
             mock_rel.assert_called()
