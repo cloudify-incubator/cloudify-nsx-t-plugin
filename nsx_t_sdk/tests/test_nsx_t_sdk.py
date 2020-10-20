@@ -15,10 +15,10 @@
 
 # Standard Imports
 import unittest
-import mock
 
 # Third parties imports
 import requests
+import mock
 
 # Local imports
 from nsx_t_sdk.common import NSXTResource
@@ -34,6 +34,7 @@ class MockSessionResponse(object):
 
 class NSXTSDKTestCase(unittest.TestCase):
     def setUp(self):
+        super(NSXTSDKTestCase, self).setUp()
         self.client_config = {
             'username': 'foo',
             'password': 'bar',
@@ -43,7 +44,6 @@ class NSXTSDKTestCase(unittest.TestCase):
             'auth_type': 'basic'
         }
         self.logger = mock.MagicMock()
-        super(NSXTSDKTestCase, self).setUp()
 
     @mock.patch('nsx_t_sdk.common.NSXTResource._prepare_nsx_t_client')
     def test_nsx_t_client_config(self, _):
