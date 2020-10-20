@@ -24,11 +24,8 @@ from nsx_t_sdk.resources import (
 )
 from nsx_t_sdk.exceptions import MethodNotAllowed
 from nsx_t_sdk.common import (
-    ACTION_UPDATE,
     ACTION_DELETE,
-    ACTION_GET,
-    ACTION_LIST,
-    ACTION_PATCH
+    ACTION_LIST
 )
 
 
