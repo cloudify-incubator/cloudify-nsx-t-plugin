@@ -17,6 +17,7 @@
 import mock
 
 from cloudify.state import current_ctx
+from cloudify.exceptions import NonRecoverableError
 
 # Local Imports
 from nsx_t_plugin.tests.base import (
@@ -74,7 +75,7 @@ class DecoratorTestCase(NSXTPluginTestBase):
         self._prepare_context_for_operation(
             test_name='NodeInstanceContext',
             test_properties=self.node_properties,
-            ctx_operation_name='foot.operation')
+            ctx_operation_name='foo.operation')
         func = mock.Mock()
         func.__name__ = 'foo_func'
         with mock.patch('nsx_t_sdk.common.NSXTResource._prepare_nsx_t_client'):
@@ -135,3 +136,16 @@ class DecoratorTestCase(NSXTPluginTestBase):
             mock_set.assert_not_called()
             mock_delete.assert_not_called()
             func.assert_called()
+
+    def test_raise_exception_with_nsx_t_client(self):
+        self._prepare_context_for_operation(
+            test_name='NodeInstanceContext',
+            test_properties=self.node_properties,
+            ctx_operation_name='foo.operation')
+        func = mock.Mock()
+        func.__name__ = 'foo_func'
+        func.side_effect = Exception('Some Exception')
+        with mock.patch('nsx_t_sdk.common.NSXTResource._prepare_nsx_t_client'):
+            with self.assertRaises(NonRecoverableError):
+                with_nsx_t_client(NSXTResource)(func)()
+                func.assert_called()
