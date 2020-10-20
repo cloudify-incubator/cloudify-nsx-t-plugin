@@ -269,3 +269,11 @@ class SegmentStateTestCase(NSXTSDKTestCase):
             self.segment_state.list(
                 filters={'id': self.segment_state.resource_id}
             )
+
+    @mock.patch('nsx_t_sdk.common.NSXTResource._invoke')
+    def test_get_segment_state(self, invoke_mock):
+        self.segment_state.get()
+        invoke_mock.assert_called_with(
+            ACTION_GET,
+            (self.segment_state.resource_id,)
+        )
