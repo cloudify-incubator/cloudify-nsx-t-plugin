@@ -119,15 +119,18 @@ class NSXTPluginTestBase(unittest.TestCase):
 
     def get_mock_ctx(self,
                      test_name,
-                     test_properties={},
-                     test_runtime_properties={},
+                     test_properties=None,
+                     test_runtime_properties=None,
                      test_relationships=None,
-                     type_hierarchy=['cloudify.nodes.Root'],
+                     type_hierarchy=None,
                      node_type='cloudify.nodes.Root',
                      test_source=None,
                      test_target=None,
                      ctx_operation_name=None):
 
+        test_properties = test_properties or {}
+        test_runtime_properties = test_runtime_properties or {}
+        type_hierarchy = type_hierarchy or ['cloudify.nodes.Root']
         operation_ctx = {
             'retry_number': 0, 'name': 'cloudify.interfaces.lifecycle.'
         } if not ctx_operation_name else {
@@ -158,13 +161,16 @@ class NSXTPluginTestBase(unittest.TestCase):
 
     def _prepare_context_for_operation(self,
                                        test_name,
-                                       test_properties={},
-                                       test_runtime_properties={},
+                                       test_properties=None,
+                                       test_runtime_properties=None,
                                        test_relationships=None,
-                                       type_hierarchy=['cloudify.nodes.Root'],
+                                       type_hierarchy=None,
                                        test_source=None,
                                        test_target=None,
                                        ctx_operation_name=None):
+        test_properties = test_properties or {}
+        test_runtime_properties = test_runtime_properties or {}
+        type_hierarchy = type_hierarchy or ['cloudify.nodes.Root']
         self._ctx = self.get_mock_ctx(
             test_name=test_name,
             test_properties=test_properties,
@@ -179,12 +185,13 @@ class NSXTPluginTestBase(unittest.TestCase):
     def get_mock_relationship_ctx(self,
                                   deployment_name=None,
                                   node_id=None,
-                                  test_properties={},
-                                  test_runtime_properties={},
+                                  test_properties=None,
+                                  test_runtime_properties=None,
                                   test_source=None,
                                   test_target=None,
                                   ctx_operation=None):
-
+        test_properties = test_properties or {}
+        test_runtime_properties = test_runtime_properties or {}
         ctx = CustomMockCloudifyContext(
             node_id=node_id,
             deployment_id=deployment_name,

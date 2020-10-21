@@ -21,11 +21,11 @@ from cloudify.exceptions import NonRecoverableError, OperationRetry
 
 # Local Imports
 from nsx_t_plugin.tests.base import (
+    NSXTPluginTestBase,
     CustomMockContext,
     MockNodeInstanceContext,
     MockNodeContext
 )
-from nsx_t_plugin.tests.base import NSXTPluginTestBase
 from nsx_t_plugin.decorators import with_nsx_t_client
 from nsx_t_sdk.resources import NSXTResource
 
