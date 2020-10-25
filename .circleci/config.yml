@@ -60,6 +60,7 @@ commands:
       - run: |
             ~/venv/bin/pip install -Ur test-requirements.txt
             ~/venv/bin/pip install -Ur dev-requirements.txt
+            ~/venv/bin/pip install -e .
 
       - run: |
           ~/venv/bin/nosetests \
