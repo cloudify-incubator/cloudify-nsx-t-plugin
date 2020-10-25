@@ -173,7 +173,7 @@ def _wait_on_dhcp_static_bindings(segment_id, client_config):
         logger=ctx.logger
     )
 
-    dhcp_v6_binding = DhcpV4StaticBindingConfig(
+    dhcp_v6_binding = DhcpV6StaticBindingConfig(
         client_config=client_config,
         resource_config={},
         logger=ctx.logger

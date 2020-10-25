@@ -41,36 +41,6 @@ from nsx_t_plugin.utils import (
 
 class UtilsTestCase(NSXTPluginTestBase):
 
-    def _set_context_operation(self,
-                               instance_type='instance',
-                               runtime_properties=None,
-                               properties=None,
-                               type_hierarchy=None,
-                               relationships=None,
-                               ctx_operation_name='foo.operation',
-                               source=None,
-                               target=None,
-                               node_id=None):
-
-        runtime_properties = runtime_properties or self.runtime_properties
-        properties = properties or self.node_properties
-        if instance_type == 'instance':
-            self._prepare_context_for_operation(
-                test_name='NodeInstanceContext',
-                test_properties=properties,
-                type_hierarchy=type_hierarchy,
-                test_runtime_properties=runtime_properties,
-                test_relationships=relationships,
-                ctx_operation_name=ctx_operation_name)
-        else:
-            self._pepare_relationship_context_for_operation(
-                deployment_id='foo-deployment',
-                source=source,
-                target=target,
-                ctx_operation_name=ctx_operation_name,
-                node_id=node_id
-            )
-
     def test_get_context_object(self):
         self._set_context_operation()
         self.assertTrue(get_ctx_object(self._ctx) is self._ctx)
